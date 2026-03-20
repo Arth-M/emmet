@@ -1,5 +1,8 @@
 # README
 
+find PID of faulty db reader from rails :
+psql postgres -c "SELECT pid, application_name, state FROM pg_stat_activity WHERE datname = 'dinner_time_development';"
+
 This is a test from Pennylane, the purpose of this app is to create an application that helps users find the most relevant recipes that they can prepare with the ingredients that they have at home
 
 ##User stories
@@ -11,7 +14,7 @@ This is a test from Pennylane, the purpose of this app is to create an applicati
 ##Dependencies
 * Ruby version: 3.3.5
 * Rails version:7.1.6
- 
+
 * System dependencies
 
 * Configuration
