@@ -1,4 +1,7 @@
 # README
+pe shortcut => <%= %>
+er shortcut => <% %>
+
 
 find PID of faulty db reader from rails :
 psql postgres -c "SELECT pid, application_name, state FROM pg_stat_activity WHERE datname = 'dinner_time_development';"
