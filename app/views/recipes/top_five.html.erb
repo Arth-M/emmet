@@ -1,4 +1,19 @@
-<% @recipes.each do |recipe| %>
+<%= form_with url: "/your-recipes", method: :get do |form| %>
+  <%= form.label :query, "Search for:" %>
+  <%= form.search_field :query, placeholder: "e.g. Carrot", maxlength: 200  %>
+  <% if flash[:noIngredients] %>
+    <p><%= flash[:noIngredients] %></p>
+  <% end %>
+  <%= form.submit "Search" %>
+<% end %>
+
+<% if notice%>
+  <p><%= notice%></p>
+<% end %>
+
+
+
+<% @top_5_recipes.each do |recipe| %>
   <%= link_to recipe_path(recipe) do %>
     <%= recipe.title  %><br>
   <% end %>

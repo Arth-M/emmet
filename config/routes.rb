@@ -7,11 +7,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "recipes#top_five"
-
   resources :recipes, only: %i[show], as: :recipe
-  get "search", to: "recipes#search_page", as: :search_page
-
-  get "data-search", to: "recipes#data_search", as: :data_search
   get "your-recipes", to: "recipes#found_recipes", as: :found_recipes
 
 end

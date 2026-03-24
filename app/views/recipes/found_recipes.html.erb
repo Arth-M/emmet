@@ -1,0 +1,12 @@
+<% @top_recipes.each do |recipe| %>
+  <%= link_to recipe_path(recipe) do %>
+    <%= recipe.title  %><br>
+  <% end %>
+  <% recipe.ingredients.each do |ingredient| %>
+    <%= ingredient.name %> <br>
+  <% end %>
+<% end%>
+
+<% if @message %>
+  <%= @message %>
+<% end %>
