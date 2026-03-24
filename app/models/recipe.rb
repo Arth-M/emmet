@@ -6,4 +6,12 @@ class Recipe < ApplicationRecord
   validates :title, :cook_time, :prep_time, :total_time,
   :rating, presence:  { strict: true }
   validates :title, uniqueness: true
+
+  scope :top_n, ->(n) { order(rating: :desc).limit(n) }
+
+  def self.search(query)
+    joins(:ingredients).where("ingredients.name ILIKE ?", "%#{query}%")
+  end
+
+
 end

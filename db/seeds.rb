@@ -30,6 +30,8 @@ recipes.each do |recipe|
   # on calcule le temps total de préparation+cuisson pour futur filtre si possible
   total_time = recipe['cook_time'] + recipe['prep_time']
 
+  # regexp pour extraire l'adresse de l'image, si pas de match l'adresse est directement ok
+  # d'après les data checkées
   match_url = recipe['image'].match(/https?%3A.+$/i)
   if match_url
     image_url = URI.decode_www_form_component(match_url[0])
@@ -56,17 +58,20 @@ recipes.each do |recipe|
   # 3 & 4. Créer les ingrédients et les jointures
   recipe['ingredients'].each do |ingredient_string|
 
-    # on sélectionne :
-    #  groupe 1: quantité : nombre(+division en string éventuelle) puis 1 mot /
-    #  groupe 2 : ingrédient : le reste
+    # on sélectionne grâce à des regexp:
+    #  match groupe 1: quantité : nombre(+division en string éventuelle) puis 1 mot /
+    #  match groupe 2 : ingrédient : le reste
+    # match2 groupe 1 : quantité : 1 chiffre et éventuellement une fraction
+    # match2 groupe 2 : ingrédient: le reste
+    # ce qui séprare implicitement match 1 et match 2 c'est la parenthèse dans certains
+    # ingrédients
     match = ingredient_string.match(/^([\d\s⅛¼⅓½⅔¾]+\w+)\s+(.+)$/)
-    match2 = ingredient_string.match(/^([\d]+\s*[⅛¼⅓½⅔¾]?)(.+)$/)
+    match = ingredient_string.match(/^([\d⅛¼⅓½⅔¾][\d\s⅛¼⅓½⅔¾]*\w+)\s+(.+)$/)
+    match2 = ingredient_string.match(/^([\d]*\s*[⅛¼⅓½⅔¾]?)(.+)$/)
     if match
       quantity        = match[1].strip
       ingredient_name = match[2].strip
     elsif match2
-      # on prend en quantité 1 chiffre et éventuellement une fraction
-      # on prend en groupe 2 le reste (l'ingrédient)
       quantity        = match2[1].strip
       ingredient_name = match2[2].strip
     else

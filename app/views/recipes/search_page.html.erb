@@ -1,0 +1,5 @@
+<%= form_with url: "/data-search", method: :get do |form| %>
+  <%= form.label :query, "Search for:" %>
+  <%= form.search_field :query, placeholder: "e.g. Carrot", maxlength: 200  %>
+  <%= form.submit "Search" %>
+<% end %>
