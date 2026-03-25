@@ -1,10 +1,20 @@
 <div class="flex w-90 mx-auto border shadow container font mt-md">
-  <%= link_to recipe_path(recipe), class: 'no-text-deco w-fit h-fit' do %>
     <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
     <div>
         <p class='inline mx-15'><%= recipe.title %></p>
-        <p class='inline mx-15'>Total time: <%= recipe.total_time %> min</p>
-    <% end %>
+        <p class='inline mx-15'>Preparation time: <%= recipe.prep_time %> min</p>
+        <p class='inline mx-15'>Cooking time: <%= recipe.cook_time %> min</p>
+        <% if params[:query].present? %>
+          <%= link_to "Back to search",
+            found_recipes_path(query: params[:query]),
+            class: "inline button no-text-deco mx-15",
+            data: { turbo_frame: "react-like" } %>
+        <% else %>
+          <%= link_to "Back to main page",
+            root_path,
+            class: "inline button no-text-deco mx-15",
+            data: { turbo_frame: "react-like" } %>
+        <% end %>
     <div class="grid-2">
       <ul class="mt-lg">
           <% recipe.recipe_ingredients.each do |recipe_ingred| %>

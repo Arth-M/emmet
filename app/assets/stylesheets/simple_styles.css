@@ -46,6 +46,9 @@
 .no-shrink {
   flex-shrink: 0;
 }
+.items-center {
+  align-items: center;
+}
 
 .inline {
   display: inline;
@@ -165,4 +168,13 @@
 
 .overflow-x-auto {
   overflow-x: auto;
+}
+
+.button {
+  padding: 2px 4px;
+  background-color: rgb(246, 242, 242);
+  border: 1px solid black;
+  border-radius: 4px;
+  font-family: system-ui;
+  font-size: 13px;
 }

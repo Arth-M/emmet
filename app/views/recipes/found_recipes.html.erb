@@ -4,7 +4,13 @@
       <%= @message %>
     <% end %>
 
-    <h2 class='font'>10 top recipes with your ingredients</h2>
+    <div class="flex items-center">
+      <h2 class='font'>10 top recipes with your ingredients</h2>
+      <%= link_to "Back to main page",
+            root_path,
+            class: "inline button no-text-deco mx-15",
+            data: { turbo_frame: "react-like" } %>
+    </div>
     <% @top_recipes.each do |recipe| %>
       <%= render partial: "shared/recipe_summary", object: recipe, as: :recipe   %>
     <% end%>
