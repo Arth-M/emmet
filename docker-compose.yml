@@ -1,0 +1,51 @@
+# version: '2.31.0'
+
+# name: pennylane-hiring
+services:
+  web:
+    image: ruby:3.3.5
+    build: .
+    command: ./bin/rails server -b 0.0.0.0
+    # command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0"
+    # working_dir: /app
+    working_dir: /rails
+    # volumes:
+    #   - .:/opt/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    cpus: 0.5
+    mem_limit: 512m
+    env_file: ".env"
+    environment:
+      PORT: 3000
+      SECRET_KEY_BASE: <%= Rails.application.credentials.secret_key_base %>
+      DATABASE_HOST: db
+      DATABASE_USERNAME: dinner_time
+      DATABASE_NAME: dinner_time_production
+      DATABASE_PASSWORD: <%= Rails.application.credentials.postgre_password %>
+  db:
+    image: postgres:13
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file: ".env"
+    cpus: 0.5
+    mem_limit: 768m
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/my_secret_postgre
+      # POSTGRES_PASSWORD: <%= Rails.application.credentials.postgre_password %>
+      POSTGRES_USER: dinner_time
+      POSTGRES_DB: dinner_time_production
+    user: postgres
+    secrets:
+      - my_secret_postgre
+    ports:
+      - 5432:5432
+
+volumes:
+  db_data:
+
+secrets:
+  my_secret_postgre:
+    file: my_secret_postgre.txt
