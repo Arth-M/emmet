@@ -1,12 +1,19 @@
+<turbo-frame id="react-like">
 <% @top_recipes.each do |recipe| %>
   <%= link_to recipe_path(recipe) do %>
     <%= recipe.title  %><br>
   <% end %>
-  <% recipe.ingredients.each do |ingredient| %>
-    <%= ingredient.name %> <br>
+  <% recipe.recipe_ingredients.each do |recipe_ingred| %>
+    <% if recipe_ingred.quantity != '0' %>
+      <%= recipe_ingred.quantity %>
+      <%= recipe_ingred.ingredient.name %> <br>
+    <% else %>
+      <%= recipe_ingred.ingredient.name.upcase_first %> <br>
+    <% end %>
   <% end %>
 <% end%>
 
 <% if @message %>
   <%= @message %>
 <% end %>
+</turbo-frame>

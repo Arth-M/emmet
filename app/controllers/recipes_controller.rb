@@ -35,8 +35,11 @@ class RecipesController < ApplicationController
                       .group("recipes.id")
                       .order("matched_count DESC")
                       .limit(100)
+
       if recipes.empty?
-        redirect_to root_path, notice: "Aucune recette correspondante n'a été trouvée"
+        render turbo_stream: turbo_stream.append("flash-messages",
+          partial: "shared/flash_message",
+          locals: { message: "Aucune recette n'a été trouvée avec ces ingrédients" })
       end
 
     # we take the 10 recipes with the best ratings
@@ -47,7 +50,9 @@ class RecipesController < ApplicationController
 
     @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
     else
-      redirect_to root_path, flash: { noIngredients: "Veuillez entrer des ingrédients" }
+      render turbo_stream: turbo_stream.append("flash-warning",
+        partial: "shared/flash_warning",
+        locals: { message: "Veuillez entrer des ingrédients" })
     end
   end
 end

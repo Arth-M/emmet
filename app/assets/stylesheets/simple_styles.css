@@ -1,0 +1,60 @@
+.font-xl {
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: normal;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.font {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.container {
+  margin: 0 0;
+  padding: clamp(0.5rem, 2vw, 1.5rem)   /* top/bottom */
+           clamp(1rem, 4vw, 3rem);       /* left/right */
+
+}
+
+.block {
+  display: block;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mr-lg {
+  margin-right: 30%;
+}
+
+.mt-md {
+  margin-top: 8px;
+}
+
+
+.w-90 {
+  width: 90%;
+}
+
+.w-fit {
+  width:fit-content;
+}
+
+.mx-auto {
+  margin: 0 auto;
+}
+
+.opacity-middle {
+  opacity: 0.45;
+}
+
+.divider-thin {
+  border: none;
+  border-top: 1px solid currentColor;
+  opacity: 0.15;
+}
