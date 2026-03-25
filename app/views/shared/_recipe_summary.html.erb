@@ -1,0 +1,16 @@
+<div class="flex w-90 border shadow container font mt-md">
+  <%= link_to recipe_path(recipe), class: 'no-text-deco w-fit h-fit' do %>
+    <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
+    <div>
+        <p class='inline mx-15'><%= recipe.title %></p>
+        <p class='inline mx-15'>Rating: <%= recipe.rating %></p>
+        <p class='inline mx-15'>Total time: <%= recipe.total_time %> min</p>
+        <p class='inline mx-5 underline'>Let's check it out!</p>
+    <% end %>
+    <ul class="grid-3 mt-lg">
+        <% recipe.ingredients.each do |ingredient|%>
+          <li><%= ingredient.name %></li>
+        <% end %>
+    </ul>
+  </div>
+</div>

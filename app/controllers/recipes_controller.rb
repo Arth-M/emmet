@@ -3,7 +3,11 @@ class RecipesController < ApplicationController
     @top_5_recipes = Recipe.top_n(5)
   end
   def show
-    @recipe = Recipe.find(params[:id])
+    @recipe = Recipe.find_by(id: params[:id])
+    if @recipe.nil?
+      @top_5_recipes = Recipe.top_n(5)
+      render "top_five"
+    end
   end
 
   def found_recipes
@@ -39,20 +43,18 @@ class RecipesController < ApplicationController
       if recipes.empty?
         render turbo_stream: turbo_stream.append("flash-messages",
           partial: "shared/flash_message",
-          locals: { message: "Aucune recette n'a été trouvée avec ces ingrédients" })
+          locals: { message: "No recipe was found with these ingredients" })
       end
 
     # we take the 10 recipes with the best ratings
     @top_recipes = recipes.sort_by(&:rating).last(10)
-    puts @top_recipes
     # we pull them out from the recipes variable to create a new variable with all the other recipes
     top_ids = @top_recipes.map { |recipe| recipe.id }
-
     @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
     else
       render turbo_stream: turbo_stream.append("flash-warning",
         partial: "shared/flash_warning",
-        locals: { message: "Veuillez entrer des ingrédients" })
+        locals: { message: "Please enter some ingredients" })
     end
   end
 end

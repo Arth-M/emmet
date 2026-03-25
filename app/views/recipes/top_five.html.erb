@@ -1,7 +1,8 @@
 <turbo-frame id="react-like">
-  <% @top_5_recipes.each do |recipe| %>
-    <%= link_to recipe_path(recipe) do %>
-      <%= recipe.title  %><br>
+  <div class="container">
+    <h2 class="font">Top 5 recipes to enjoy your dinner</h2>
+    <% @top_5_recipes.each do |recipe| %>
+        <%= render partial: "shared/recipe_summary", object: recipe, as: :recipe   %>
     <% end %>
-  <% end %>
+  </div>
 </turbo-frame>

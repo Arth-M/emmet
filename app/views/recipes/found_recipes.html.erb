@@ -1,19 +1,24 @@
 <turbo-frame id="react-like">
-<% @top_recipes.each do |recipe| %>
-  <%= link_to recipe_path(recipe) do %>
-    <%= recipe.title  %><br>
-  <% end %>
-  <% recipe.recipe_ingredients.each do |recipe_ingred| %>
-    <% if recipe_ingred.quantity != '0' %>
-      <%= recipe_ingred.quantity %>
-      <%= recipe_ingred.ingredient.name %> <br>
-    <% else %>
-      <%= recipe_ingred.ingredient.name.upcase_first %> <br>
+  <div class="container">
+    <% if @message %>
+      <%= @message %>
     <% end %>
-  <% end %>
-<% end%>
 
-<% if @message %>
-  <%= @message %>
-<% end %>
+    <h2 class='font'>10 top recipes with your ingredients</h2>
+    <% @top_recipes.each do |recipe| %>
+      <%= render partial: "shared/recipe_summary", object: recipe, as: :recipe   %>
+    <% end%>
+  </div>
+
+  <h3 class='font mt-xl padding-container'>Food lovers also liked it</h3>
+  <div class="flex overflow-x-auto border-t border-b shadow padding-y">
+    <% @other_recipes.each do |recipe| %>
+      <%= render partial: "shared/recipe_short", object: recipe, as: :recipe   %>
+    <% end%>
+  </div>
+
+
+
+
+
 </turbo-frame>

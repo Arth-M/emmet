@@ -11,7 +11,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="h-full">
     <div class='w-fit mx-auto'>
       <h1 class="font font-xl italic mb-0">
         It's Dinner Time <span class="opacity-middle">!</span>
@@ -19,22 +19,29 @@
       <hr class="divider-thin mr-lg">
     </div>
 
-  <div class="container">
-    <%= form_with url: "/your-recipes", data: { turbo_frame: "react-like" }, method: :get do |form| %>
-      <%= form.label :query, "What do we have here ?", class: "font italic" %>
-      <%= form.search_field :query, placeholder: "e.g. Carrot", maxlength: 200, class: "w-90 mt-md"  %>
-      <% if flash[:noIngredients] %>
-        <p><%= flash[:noIngredients] %></p>
+    <div class="container">
+      <%= form_with url: "/your-recipes", data: { turbo_frame: "react-like" }, method: :get do |form| %>
+        <%= form.label :query, "What do we have here ?", class: "font italic" %>
+        <%= form.search_field :query, placeholder: "e.g. Carrot, tomatoe", maxlength: 200, class: "w-90 mt-md"  %>
+        <% if flash[:noIngredients] %>
+          <p><%= flash[:noIngredients] %></p>
+        <% end %>
+        <%= form.submit "Search", class: 'block mt-md' %>
       <% end %>
-      <%= form.submit "Search", class: 'block mt-md' %>
-    <% end %>
-  </div>
-
+    </div>
     <div id="flash-messages"></div>
     <div id="flash-warning"></div>
 
-  <div class="container">
     <%= yield %>
-  </div>
+
+    <footer class="pt-xl pb-30 w-90 mx-auto">
+      <hr class="divider-thin mx-auto">
+      <div class="w-fit mx-auto">
+        <p class="font inline mx-15">Hope this will do!</p>
+        <p class="font inline mx-15">@Pennylane-Hiring</p>
+        <p class="font inline mx-15">Arthur Michalland</p>
+      </div>
+    </footer>
+
   </body>
 </html>
