@@ -1,3 +1,4 @@
+<%# used in show.html.erb %>
 <div class="flex w-90 mx-auto border shadow container font mt-md">
     <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
     <div>
@@ -5,11 +6,13 @@
         <p class='inline mx-15'>Preparation time: <%= recipe.prep_time %> min</p>
         <p class='inline mx-15'>Cooking time: <%= recipe.cook_time %> min</p>
         <% if params[:query].present? %>
+        <%# link back to search with query params to retrieve the previous search %>
           <%= link_to "Back to search",
             found_recipes_path(query: params[:query]),
             class: "inline button no-text-deco mx-15",
             data: { turbo_frame: "react-like" } %>
         <% else %>
+        <%# link to main page - no query %>
           <%= link_to "Back to main page",
             root_path,
             class: "inline button no-text-deco mx-15",
@@ -17,6 +20,7 @@
         <% end %>
     <div class="grid-2">
       <ul class="mt-lg">
+        <%# search through recipe_ingredient(joint table) to find right quantity for ingredients %>
           <% recipe.recipe_ingredients.each do |recipe_ingred| %>
             <% if recipe_ingred.quantity != '0' %>
               <li><%= recipe_ingred.quantity %>

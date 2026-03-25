@@ -11,6 +11,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
+<%# simple layout: title and form then flash then yield and footer%>
   <body class="h-full">
     <div class='w-fit mx-auto'>
       <h1 class="font font-xl italic mb-0">
@@ -23,16 +24,14 @@
       <%= form_with url: "/your-recipes", data: { turbo_frame: "react-like" }, method: :get do |form| %>
         <%= form.label :query, "What do we have here ?", class: "font italic" %>
         <%= form.search_field :query, placeholder: "e.g. Carrot, tomatoe", maxlength: 200, class: "w-90 mt-md"  %>
-        <% if flash[:noIngredients] %>
-          <p><%= flash[:noIngredients] %></p>
-        <% end %>
         <%= form.submit "Search", class: 'block mt-md' %>
       <% end %>
     </div>
-    <div id="flash-messages"></div>
-    <div id="flash-warning"></div>
+    <%# flash for errors - used in recipes_controller - shared/_flash_messages - flash_controller.js %>
+    <div id="flash-message" data></div>
 
     <%= yield %>
+
 
     <footer class="pt-xl pb-30 w-90 mx-auto">
       <hr class="divider-thin mx-auto">

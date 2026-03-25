@@ -1,16 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  // on each turbo-frame load clear innerHTML of messages displayed to user
   connect() {
-    document.addEventListener("turbo:frame-render", this.clearAll.bind(this))
+    document.addEventListener("turbo:frame-load", this.clearAll.bind(this))
   }
 
   disconnect() {
-    document.removeEventListener("turbo:frame-render", this.clearAll.bind(this))
+    document.removeEventListener("turbo:frame-load", this.clearAll.bind(this))
   }
 
   clearAll() {
-    document.getElementById("flash-messages").innerHTML = ""
-    document.getElementById("flash-warning").innerHTML = ""
+    document.getElementById("flash-message").innerHTML = ""
   }
 }

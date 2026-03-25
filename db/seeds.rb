@@ -10,7 +10,7 @@
 
 require "json"
 
-#parser le json
+#parsing le json
 filepath = Rails.root.join('recipes-en.json')
 serialized_recipes = File.read(filepath)
 recipes = JSON.parse(serialized_recipes)
@@ -19,19 +19,18 @@ failed=[]
 
 recipes.each do |recipe|
 
-  # 1. Créer ou trouver la catégorie
+  # Find or create category
   if recipe['category'].length > 0
     category = Category.find_or_create_by!(name: recipe['category'])
   else
     category = Category.find_or_create_by!(name: 'Other')
   end
 
-  # 2. Créer la recette (skip si elle existe déjà)
-  # on calcule le temps total de préparation+cuisson pour futur filtre si possible
+
+  # compute total time for future filter and display if possible
   total_time = recipe['cook_time'] + recipe['prep_time']
 
-  # regexp pour extraire l'adresse de l'image, si pas de match l'adresse est directement ok
-  # d'après les data checkées
+  # regexp for image url, if no match the url is taken as is
   match_url = recipe['image'].match(/https?%3A.+$/i)
   if match_url
     image_url = URI.decode_www_form_component(match_url[0])
@@ -39,6 +38,7 @@ recipes.each do |recipe|
     image_url = recipe['image']
     puts "#{i} CHECK THIS RECIPE IMAGE"
   end
+  # Create recipe (skip if already exists)
   recipe_instance = Recipe.new(
     title:     recipe['title'],
     cook_time: recipe['cook_time'],
@@ -55,16 +55,15 @@ recipes.each do |recipe|
     next
   end
 
-  # 3 & 4. Créer les ingrédients et les jointures
+  # Create ingredient and joitn table
   recipe['ingredients'].each do |ingredient_string|
 
-    # on sélectionne grâce à des regexp:
-    #  match groupe 1: quantité : nombre(+division en string éventuelle) puis 1 mot /
-    #  match groupe 2 : ingrédient : le reste
-    # match2 groupe 1 : quantité : 1 chiffre et éventuellement une fraction
-    # match2 groupe 2 : ingrédient: le reste
-    # ce qui séprare implicitement match 1 et match 2 c'est la parenthèse dans certains
-    # ingrédients
+    # match through regexp
+    #  match group 1: quantity : number (+string with division) then 1 word /
+    #  match group 2 : ingredient : what is left
+    # match2 group 1 : quantity : 1 number (+string with division)
+    # match2 group 2 : ingredient: what is left
+    # what separates match et match2 is parenthesis () in some ingredients
     match = ingredient_string.match(/^([\d\s⅛¼⅓½⅔¾]+\w+)\s+(.+)$/)
     match = ingredient_string.match(/^([\d⅛¼⅓½⅔¾][\d\s⅛¼⅓½⅔¾]*\w+)\s+(.+)$/)
     match2 = ingredient_string.match(/^([\d]*\s*[⅛¼⅓½⅔¾]?)(.+)$/)
@@ -79,7 +78,7 @@ recipes.each do |recipe|
       ingredient_name = ingredient_string
     end
 
-    # Normalisation : lowercase pour éviter les doublons "Butter" / "butter"
+    # lowercase to avoid "Butter" and "butter" in ingredients
     ingredient = Ingredient.find_or_create_by!(name: ingredient_name.downcase)
 
     RecipeIngredient.create!(

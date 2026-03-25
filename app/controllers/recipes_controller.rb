@@ -1,8 +1,10 @@
 class RecipesController < ApplicationController
   def top_five
+    # based on recipe class method top_n
     @top_5_recipes = Recipe.top_n(5)
   end
   def show
+    # find recipe by id, if not present render homepage through top_five method
     @recipe = Recipe.find_by(id: params[:id])
     if @recipe.nil?
       @top_5_recipes = Recipe.top_n(5)
@@ -11,13 +13,13 @@ class RecipesController < ApplicationController
   end
 
   def found_recipes
-    # on traite la query user:
-    # tranforme en string pour éviter erreur si params nil
-    # slice pour supprimer ce qui dépasse 200 en length
-    # split pour séparer les mots si espace ou -
-    # 1 mot par entrée dans l'array, lettres seulement
-    # rejette les entrée vides qui ressortent des traitements précédents
-    # ne garde que 10 mots max
+    # analysis of user query
+    # to string to avoid error in case params[:query] is nil
+    # slice to avoid more than 200 length
+    # split by space or -
+    # one word by array entry, only letters
+    # delete empty entries
+    # 10 words max
     words = params[:query].to_s
           .slice(0, 200)
           .split(/[\s,\-]+/)
@@ -28,32 +30,25 @@ class RecipesController < ApplicationController
     puts words
 
     if !words.empty?
-      # la recherche récupère title, id et rating et compte le nombre d'ingrédient qui matchent dans la recette (à retravailler)
-      # on prend les 100 premières recettes
-      recipes = Recipe.joins(:ingredients)
-                      .select("recipes.*, COUNT(DISTINCT ingredients.id) AS matched_count")
-                      .where(
-                        words.map { "ingredients.name LIKE ?" }.join(" OR "),
-                        *words.map { |w| "%#{w}%" }
-                      )
-                      .group("recipes.id")
-                      .order("matched_count DESC")
-                      .limit(100)
+      # use search method from recipe model
+      recipes = Recipe.search(words)
 
       if recipes.empty?
-        render turbo_stream: turbo_stream.append("flash-messages",
+        # display an message to user
+        render turbo_stream: turbo_stream.replace("flash-message",
           partial: "shared/flash_message",
           locals: { message: "No recipe was found with these ingredients" })
       end
 
-    # we take the 10 recipes with the best ratings
-    @top_recipes = recipes.sort_by(&:rating).last(10)
-    # we pull them out from the recipes variable to create a new variable with all the other recipes
-    top_ids = @top_recipes.map { |recipe| recipe.id }
-    @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
+      # we take the 10 recipes with the best ratings
+      @top_recipes = recipes.sort_by(&:rating).last(10)
+      # we pull them out from the recipes variable to create a new variable with all the other recipes
+      top_ids = @top_recipes.map { |recipe| recipe.id }
+      @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
     else
-      render turbo_stream: turbo_stream.append("flash-warning",
-        partial: "shared/flash_warning",
+      # if no word in query, display message to user
+      render turbo_stream: turbo_stream.replace("flash-message",
+        partial: "shared/flash_message",
         locals: { message: "Please enter some ingredients" })
     end
   end

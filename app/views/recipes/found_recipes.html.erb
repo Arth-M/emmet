@@ -1,9 +1,6 @@
+<%# turbo frame used in each view to behave SPA like %>
 <turbo-frame id="react-like">
   <div class="container">
-    <% if @message %>
-      <%= @message %>
-    <% end %>
-
     <div class="flex items-center">
       <h2 class='font'>10 top recipes with your ingredients</h2>
       <%= link_to "Back to main page",
@@ -11,11 +8,13 @@
             class: "inline button no-text-deco mx-15",
             data: { turbo_frame: "react-like" } %>
     </div>
+    <%# each top recipe from search displayed through a partial a bit detailed - same as top_five %>
     <% @top_recipes.each do |recipe| %>
       <%= render partial: "shared/recipe_summary", object: recipe, as: :recipe   %>
     <% end%>
   </div>
 
+<%# other recipes displayed through a shorter partial  %>
   <h3 class='font mt-xl padding-container'>Food lovers also liked it</h3>
   <div class="flex overflow-x-auto border-t border-b shadow padding-y">
     <% @other_recipes.each do |recipe| %>
