@@ -17,15 +17,21 @@ class Recipe < ApplicationRecord
     return [] if words.blank?
 
     recipe_ids = joins(:ingredients)
+    # we search the recipes we at least on word provided by user match (like) an ingredient
       .where(
         words.map { "ingredients.name LIKE ?" }.join(" OR "),
         *words.map { |w| "%#{w}%" }
       )
       .group("recipes.id")
+      # counting the number of distinct ingredient match per recipe
       .order(Arel.sql("COUNT(DISTINCT ingredients.id) DESC"))
+      # max hundred recipes
       .limit(100)
+      # return ids as an array
       .pluck(:id)
 
+      # using recipe ids array we select the recipes with ingredient id and name
+      # several lines by recipe
     joins(:ingredients)
       .select(
         "recipes.*",
