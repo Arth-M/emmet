@@ -1,4 +1,5 @@
-<h1>Recipes#show</h1>
-<p>Find me in app/views/recipes/show.html.erb</p>
-
-<%= @recipe.title %>
+<%# turbo frame used in each view to behave SPA like %>
+<%# display the recipe with all infos %>
+<turbo-frame id="react-like">
+  <%= render partial: "shared/recipe_total", object: @recipe, as: :recipe   %>
+</turbo-frame>

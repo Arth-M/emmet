@@ -1,8 +1,13 @@
 #!/bin/bash -e
 
+echo "1: '${1}'"
+echo "2: '${2}'"
 # If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
-  ./bin/rails db:prepare
+if [[ "${1}" == "./bin/rails" ]] && [[ "${2}" == "server" ]]; then
+  echo "COUCOU CA MARCHE"
+  ./bin/rails db:create
+  ./bin/rails db:migrate
+  ./bin/rails db:seed
 fi
 
 exec "${@}"
