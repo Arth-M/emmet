@@ -1,6 +1,6 @@
 <%# used for top_recipes in found_recipes.html.erb and top_five.html.erb %>
 <div class="flex w-90 border shadow container font mt-md">
-  <%# link back to search with query params to retrieve the previous search %>
+  <%# link to full recipe with query params to lately retrieve the previous search %>
   <%= link_to recipe_path(recipe, query: params[:query]), class: 'no-text-deco w-fit h-fit' do %>
     <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
     <div>

@@ -7,7 +7,7 @@
         <p class='inline mx-15'>Cooking time: <%= recipe.cook_time %> min</p>
         <% if params[:query].present? %>
         <%# link back to search with query params to retrieve the previous search %>
-          <%= link_to "Back to search",
+          <%= link_to "Back to your results",
             found_recipes_path(query: params[:query]),
             class: "inline button no-text-deco mx-15",
             data: { turbo_frame: "react-like" } %>

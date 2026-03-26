@@ -10,11 +10,6 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-
-
-# schema is categories => recipes(category_id) => recipe_ingredients(recipe_id, ingredient_id) <= ingredients
-
 ActiveRecord::Schema[7.1].define(version: 2026_03_20_113801) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"

@@ -65,8 +65,7 @@ recipes.each do |recipe|
     # match2 group 2 : ingredient: what is left
     # what separates match et match2 is parenthesis () in some ingredients
     match = ingredient_string.match(/^([\d\s⅛¼⅓½⅔¾]+\w+)\s+(.+)$/)
-    match = ingredient_string.match(/^([\d⅛¼⅓½⅔¾][\d\s⅛¼⅓½⅔¾]*\w+)\s+(.+)$/)
-    match2 = ingredient_string.match(/^([\d]*\s*[⅛¼⅓½⅔¾]?)(.+)$/)
+    match2 = ingredient_string.match(/^((?:\d+\s*)?[⅛¼⅓⅔¾]|\d+(?:\s*[⅛¼⅓⅔¾])?)(.+)$/)
     if match
       quantity        = match[1].strip
       ingredient_name = match[2].strip
