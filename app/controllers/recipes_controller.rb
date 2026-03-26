@@ -23,7 +23,7 @@ class RecipesController < ApplicationController
     words = params[:query].to_s
           .slice(0, 200)
           .split(/[\s,\-]+/)
-          .map  { |w| w.gsub(/[^\p{L}]/u, '') }
+          .map  { |w| w.gsub(/[^\p{L}]/u, '').downcase }
           .reject(&:empty?)
           .first(10)
 
