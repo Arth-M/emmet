@@ -32,7 +32,7 @@ class RecipesController < ApplicationController
     if !words.empty?
       # use search method from recipe model
       recipes_many_matches = Recipe.search(words)
-      recipes={}
+
       recipes_score = recipes_many_matches.each_with_object({}) do |row, hash|
         matched_words = words.select { |w| row.ingredient_name.include?(w.downcase) }
         next if matched_words.empty?
@@ -51,10 +51,8 @@ class RecipesController < ApplicationController
         entry[:score] = entry[:matched_words].length.to_f / words.length
         entry
       end
-      debugger
 
-
-      if recipes.empty?
+      if recipes_score.empty?
         # display an message to user
         render turbo_stream: turbo_stream.replace("flash-message",
           partial: "shared/flash_message",
@@ -62,10 +60,14 @@ class RecipesController < ApplicationController
       end
 
       # we take the 10 recipes with the best ratings
-      @top_recipes = recipes.sort_by(&:rating).last(10)
+      @top_recipes = recipes_score
+      .sort_by { |r| [-r[:score], -r[:recipe].rating] }
+      .first(10)
+      .map { |r| r[:recipe] }
+
       # we pull them out from the recipes variable to create a new variable with all the other recipes
-      top_ids = @top_recipes.map { |recipe| recipe.id }
-      @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
+      top_ids = @top_recipes.map { |r| r.id }
+      @other_recipes = recipes_score.reject { |r| top_ids.include?(r[:recipe].id) }.map { |r| r[:recipe] }
     else
       # if no word in query, display message to user
       render turbo_stream: turbo_stream.replace("flash-message",

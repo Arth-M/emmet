@@ -14,23 +14,42 @@ class Recipe < ApplicationRecord
     # words are ingredients - see recipes_controller
     # select all from recipe, ingredient id and name for analysis in recipes_controller
     # take first 100 recipes
+    return [] if words.blank?
 
-  recipe_ids = joins(:ingredients)
-    .where(
-      words.map { "ingredients.name LIKE ?" }.join(" OR "),
-      *words.map { |w| "%#{w}%" }
-    )
-    .distinct
-    .limit(100)
-    .pluck(:id)
+    recipe_ids = joins(:ingredients)
+      .where(
+        words.map { "ingredients.name LIKE ?" }.join(" OR "),
+        *words.map { |w| "%#{w}%" }
+      )
+      .group("recipes.id")
+      .order(Arel.sql("COUNT(DISTINCT ingredients.id) DESC"))
+      .limit(100)
+      .pluck(:id)
 
-  joins(:ingredients)
-    .select(
-      "recipes.*",
-      "ingredients.id AS ingredient_id",
-      "ingredients.name AS ingredient_name"
-    )
-    .where(id: recipe_ids)
+    joins(:ingredients)
+      .select(
+        "recipes.*",
+        "ingredients.id AS ingredient_id",
+        "ingredients.name AS ingredient_name"
+      )
+      .where(id: recipe_ids)
+
+  # recipe_ids = joins(:ingredients)
+  #   .where(
+  #     words.map { "ingredients.name LIKE ?" }.join(" OR "),
+  #     *words.map { |w| "%#{w}%" }
+  #   )
+  #   .distinct
+  #   .limit(100)
+  #   .pluck(:id)
+
+  # joins(:ingredients)
+  #   .select(
+  #     "recipes.*",
+  #     "ingredients.id AS ingredient_id",
+  #     "ingredients.name AS ingredient_name"
+  #   )
+  #   .where(id: recipe_ids)
   end
 
 
