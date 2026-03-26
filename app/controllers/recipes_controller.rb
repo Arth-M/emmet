@@ -32,16 +32,26 @@ class RecipesController < ApplicationController
     if !words.empty?
       # use search method from recipe model
       recipes_many_matches = Recipe.search(words)
-      recipes_score= recipes_many_matches.map do |row|
-        matched_word = words.find { |word| row.ingredient_name.include?(w.downcase) }
-        next unless matched_word
-        {
-          recipe: row,
-          ingredient_id: row.ingredient_id,
-          matched_word: matched_word,
-          score: 0  # à calculer
-        }
-      end.compact
+      recipes={}
+      recipes_score = recipes_many_matches.each_with_object({}) do |row, hash|
+        matched_words = words.select { |w| row.ingredient_name.include?(w.downcase) }
+        next if matched_words.empty?
+
+        recipe_id = row.id
+
+        if hash[recipe_id]
+          hash[recipe_id][:matched_words] |= matched_words
+        else
+          hash[recipe_id] = {
+            recipe: row,
+            matched_words: matched_words
+          }
+        end
+      end.values.map do |entry|
+        entry[:score] = entry[:matched_words].length.to_f / words.length
+        entry
+      end
+      debugger
 
 
       if recipes.empty?
