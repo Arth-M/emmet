@@ -81,4 +81,5 @@ production:
   <<: *default
   database: dinner_time_production
   username: dinner_time
-  password: <%= ENV["DINNER_TIME_DATABASE_PASSWORD"] %>
+  host: db
+  password: <%= Rails.application.credentials.postgre_password %>

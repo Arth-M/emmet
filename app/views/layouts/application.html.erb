@@ -1,16 +1,47 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>DinnerTime</title>
+    <title>Dinner Time ! </title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%# <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+<%# simple layout: title and form then flash then yield and footer%>
+  <body class="h-full">
+    <div class='w-fit mx-auto'>
+      <h1 class="mt-xl">
+        <a href="/" class="no-text-deco font font-xl italic mb-0" data-turbo-frame="react-like">
+        It's Dinner Time <span class="opacity-middle">!</span></a>
+      </h1>
+      <hr class="divider-thin mr-lg">
+    </div>
+
+    <div class="container">
+      <%= form_with url: "/your-recipes", data: { turbo_frame: "react-like" }, method: :get do |form| %>
+        <%= form.label :query, "What do we have here ?", class: "font italic" %>
+        <%= form.search_field :query, placeholder: "e.g. Carrot, tomatoe", maxlength: 200, class: "w-90 mt-md"  %>
+        <%= form.submit "Search", class: 'block mt-md' %>
+      <% end %>
+    </div>
+    <%# flash for errors - used in recipes_controller - shared/_flash_messages - flash_controller.js %>
+    <div id="flash-message" data></div>
+
     <%= yield %>
+
+
+    <footer class="pt-xl pb-30 w-90 mx-auto">
+      <hr class="divider-thin mx-auto">
+      <div class="w-fit mx-auto">
+        <p class="font inline mx-15">Hope this will do!</p>
+        <p class="font inline mx-15">@Pennylane-Hiring</p>
+        <p class="font inline mx-15">Arthur Michalland</p>
+      </div>
+    </footer>
+
   </body>
 </html>

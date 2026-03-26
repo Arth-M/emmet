@@ -1,19 +1,25 @@
 class RecipesController < ApplicationController
   def top_five
+    # based on recipe class method top_n
     @top_5_recipes = Recipe.top_n(5)
   end
   def show
-    @recipe = Recipe.find(params[:id])
+    # find recipe by id, if not present render homepage through top_five method
+    @recipe = Recipe.find_by(id: params[:id])
+    if @recipe.nil?
+      @top_5_recipes = Recipe.top_n(5)
+      render "top_five"
+    end
   end
 
   def found_recipes
-    # on traite la query user:
-    # tranforme en string pour éviter erreur si params nil
-    # slice pour supprimer ce qui dépasse 200 en length
-    # split pour séparer les mots si espace ou -
-    # 1 mot par entrée dans l'array, lettres seulement
-    # rejette les entrée vides qui ressortent des traitements précédents
-    # ne garde que 10 mots max
+    # analysis of user query
+    # to string to avoid error in case params[:query] is nil
+    # slice to avoid more than 200 length
+    # split by space or -
+    # one word by array entry, only letters
+    # delete empty entries
+    # 10 words max
     words = params[:query].to_s
           .slice(0, 200)
           .split(/[\s,\-]+/)
@@ -24,30 +30,49 @@ class RecipesController < ApplicationController
     puts words
 
     if !words.empty?
-      # la recherche récupère title, id et rating et compte le nombre d'ingrédient qui matchent dans la recette (à retravailler)
-      # on prend les 100 premières recettes
-      recipes = Recipe.joins(:ingredients)
-                      .select("recipes.*, COUNT(DISTINCT ingredients.id) AS matched_count")
-                      .where(
-                        words.map { "ingredients.name LIKE ?" }.join(" OR "),
-                        *words.map { |w| "%#{w}%" }
-                      )
-                      .group("recipes.id")
-                      .order("matched_count DESC")
-                      .limit(100)
-      if recipes.empty?
-        redirect_to root_path, notice: "Aucune recette correspondante n'a été trouvée"
+      # use search method from recipe model
+      recipes_many_matches = Recipe.search(words)
+
+      recipes_score = recipes_many_matches.each_with_object({}) do |row, hash|
+        matched_words = words.select { |w| row.ingredient_name.include?(w.downcase) }
+        next if matched_words.empty?
+
+        recipe_id = row.id
+
+        if hash[recipe_id]
+          hash[recipe_id][:matched_words] |= matched_words
+        else
+          hash[recipe_id] = {
+            recipe: row,
+            matched_words: matched_words
+          }
+        end
+      end.values.map do |entry|
+        entry[:score] = entry[:matched_words].length.to_f / words.length
+        entry
       end
 
-    # we take the 10 recipes with the best ratings
-    @top_recipes = recipes.sort_by(&:rating).last(10)
-    puts @top_recipes
-    # we pull them out from the recipes variable to create a new variable with all the other recipes
-    top_ids = @top_recipes.map { |recipe| recipe.id }
+      if recipes_score.empty?
+        # display an message to user
+        render turbo_stream: turbo_stream.replace("flash-message",
+          partial: "shared/flash_message",
+          locals: { message: "No recipe was found with these ingredients" })
+      end
 
-    @other_recipes = recipes.reject { |r| top_ids.include?(r.id) }
+      # we take the 10 recipes with the best ratings
+      @top_recipes = recipes_score
+      .sort_by { |r| [-r[:score], -r[:recipe].rating] }
+      .first(10)
+      .map { |r| r[:recipe] }
+
+      # we pull them out from the recipes variable to create a new variable with all the other recipes
+      top_ids = @top_recipes.map { |r| r.id }
+      @other_recipes = recipes_score.reject { |r| top_ids.include?(r[:recipe].id) }.map { |r| r[:recipe] }
     else
-      redirect_to root_path, flash: { noIngredients: "Veuillez entrer des ingrédients" }
+      # if no word in query, display message to user
+      render turbo_stream: turbo_stream.replace("flash-message",
+        partial: "shared/flash_message",
+        locals: { message: "Please enter some ingredients" })
     end
   end
 end
