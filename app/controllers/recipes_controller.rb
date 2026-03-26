@@ -27,10 +27,8 @@ class RecipesController < ApplicationController
           .reject(&:empty?)
           .first(10)
 
-    puts words
-
     if !words.empty?
-      # use search method from recipe model
+      # based on search class method from recipe model
       recipes_many_matches = Recipe.search(words)
 
       recipes_score = recipes_many_matches.each_with_object({}) do |row, hash|
