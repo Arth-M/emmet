@@ -4,14 +4,14 @@ class RecipesControllerTest < ActionDispatch::IntegrationTest
   # simulate a request
   # check response code
   # check state of variables in controller
-  
+
   test "top_five returns 200 and assigns top 5 recipes" do
     get root_path
     assert_response :success
     assert_equal 5, assigns(:top_5_recipes).length
   end
 
-  test "show returns 200 for existing recipe" do
+  test "show returns 200 for existing recipe and assign recipe with the good id" do
     recipe = Recipe.first
     get recipe_path(recipe.id)
     assert_response :success

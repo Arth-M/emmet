@@ -1,8 +1,10 @@
 <%# used in show.html.erb %>
-<div class="flex w-90 mx-auto border shadow container font mt-md">
+<%# class recipe-card used for tests %>
+<div class="recipe-card flex w-90 mx-auto border shadow container font mt-md">
     <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
     <div>
-        <p class='inline mx-15'><%= recipe.title %></p>
+      <%# id title used for tests %>
+        <p id="title" class='inline mx-15'><%= recipe.title %></p>
         <p class='inline mx-15'>Preparation time: <%= recipe.prep_time %> min</p>
         <p class='inline mx-15'>Cooking time: <%= recipe.cook_time %> min</p>
         <% if params[:query].present? %>

@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
     cpus: 0.5
-    mem_limit: 512m
+    mem_limit: 256m
     env_file: ".env"
     environment:
       PORT: 3000
@@ -31,7 +31,7 @@ services:
       - db_data:/var/lib/postgresql/data
     env_file: ".env"
     cpus: 0.5
-    mem_limit: 768m
+    mem_limit: 256m
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/my_secret_postgre
       # POSTGRES_PASSWORD: <%= Rails.application.credentials.postgre_password %>

@@ -1,5 +1,6 @@
 <%# used for other recipes in foudn_recipes.html.erb %>
-<div class="flex no-shrink w-500 border shadow container font mt-md mx-15">
+<%# class recipe-card used for tests %>
+<div class="recipe-card flex no-shrink w-500 border shadow container font mt-md mx-15">
   <%# link to full recipe with query params to lately retrieve the previous search %>
   <%= link_to recipe_path(recipe, query: params[:query]), class: 'no-text-deco w-fit h-fit' do %>
     <img src="<%= recipe.image %>" alt="" class='w-80 h-80'>
