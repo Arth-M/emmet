@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id_pav: MyString
+  name: MyString
+  address: MyText
+  city: MyString
+  zip: 1
+  lat: MyString
+  lng: MyString
+  capacity: one
+  wastetype: one
+
+two:
+  id_pav: MyString
+  name: MyString
+  address: MyText
+  city: MyString
+  zip: 1
+  lat: MyString
+  lng: MyString
+  capacity: two
+  wastetype: two
