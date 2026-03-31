@@ -7,6 +7,7 @@ class Event < ApplicationRecord
   has_many :incidents
   has_many :incident_types, through: :incidents
 
-  validates :log_id, :occurred_at, presence: {strict: true}
+  validates :log_id, :occurred_at, :event_type, presence: {strict: true}
   validates :log_id, uniqueness:  { strict: true }
+  validates :event_type, inclusion: { in: %w[sensor_reading incident badge_deposit] }
 end

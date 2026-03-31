@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_30_151033) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,8 +24,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_151033) do
     t.string "badge_id"
     t.string "issued_at"
     t.boolean "badge_revoked"
-    t.boolean "access_granted"
-    t.string "anomaly_flags", default: [], array: true
     t.bigint "badge_provider_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -44,11 +42,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_151033) do
     t.bigint "location_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "event_type"
     t.index ["location_id"], name: "index_events_on_location_id"
   end
 
   create_table "incident_types", force: :cascade do |t|
-    t.string "type"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -70,6 +69,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_151033) do
     t.bigint "badge_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "access_granted"
+    t.string "anomaly_flags", default: [], array: true
     t.index ["badge_id"], name: "index_join_event_badges_on_badge_id"
     t.index ["event_id"], name: "index_join_event_badges_on_event_id"
   end
@@ -113,7 +114,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_151033) do
   end
 
   create_table "waste_types", force: :cascade do |t|
-    t.string "type"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
