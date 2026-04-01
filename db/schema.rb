@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_01_133737) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -22,8 +22,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
 
   create_table "badges", force: :cascade do |t|
     t.string "badge_id"
-    t.string "issued_at"
-    t.boolean "badge_revoked"
+    t.datetime "issued_at"
     t.bigint "badge_provider_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -38,12 +37,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
 
   create_table "events", force: :cascade do |t|
     t.string "log_id"
-    t.string "occurred_at"
+    t.datetime "occurred_at"
     t.bigint "location_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "event_type"
+    t.index ["location_id", "event_type"], name: "index_events_on_location_id_and_event_type"
     t.index ["location_id"], name: "index_events_on_location_id"
+    t.index ["occurred_at"], name: "index_events_on_occurred_at"
   end
 
   create_table "incident_types", force: :cascade do |t|
@@ -54,7 +55,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
 
   create_table "incidents", force: :cascade do |t|
     t.boolean "resolved"
-    t.string "resolved_at"
+    t.datetime "resolved_at"
     t.string "note"
     t.bigint "incident_type_id", null: false
     t.bigint "event_id", null: false
@@ -62,6 +63,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_incidents_on_event_id"
     t.index ["incident_type_id"], name: "index_incidents_on_incident_type_id"
+    t.index ["resolved"], name: "index_incidents_on_resolved"
+    t.index ["resolved_at"], name: "index_incidents_on_resolved_at"
   end
 
   create_table "join_event_badges", force: :cascade do |t|
@@ -70,6 +73,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_152634) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "access_granted"
+    t.boolean "badge_revoked"
     t.string "anomaly_flags", default: [], array: true
     t.index ["badge_id"], name: "index_join_event_badges_on_badge_id"
     t.index ["event_id"], name: "index_join_event_badges_on_event_id"

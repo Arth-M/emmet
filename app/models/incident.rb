@@ -1,6 +1,16 @@
 class Incident < ApplicationRecord
   belongs_to :incident_type
   belongs_to :event
+  has_one :location, through: :event
 
-  validates :resolved, :resolved_at, :note, presence: { strict: true }
+  validates :incident_type, presence: { strict: true }
+  validates :resolved, inclusion: { in: [true, false] }
+
+  def resolution_delay_hours
+    if resolved && resolved_at && event.occurred_at
+      ((resolved_at_time - event.occurred_at_time) / 3600).round(1)
+    end
+  end
+
+
 end

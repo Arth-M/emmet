@@ -1,7 +1,6 @@
 class WasteType < ApplicationRecord
   has_many :join_location_capacity_waste_types
-  has_many :locations, through: :join_location_capacity_waste_types
 
-  validates :type, presence: {strict: true}
-  validates :uniqueness, presence: {strict: true}
+  validates :name, presence: {strict: true}
+  validates :name, uniqueness: {strict: true}
 end
