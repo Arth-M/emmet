@@ -1,6 +1,7 @@
 # 📝 Énoncé
 
 Run using ./bin/dev
+check css builds bin/rails tailwindcss:watch
 
 Une collectivité gère un parc de points d'apport volontaire (PAV) répartis en ville. Construis une application qui permet aux agents de la collectivité de suivre l'état du parc et d'exploiter les données remontées par les équipements.
 
