@@ -1,5 +1,7 @@
 # 📝 Énoncé
 
+Run using ./bin/dev
+
 Une collectivité gère un parc de points d'apport volontaire (PAV) répartis en ville. Construis une application qui permet aux agents de la collectivité de suivre l'état du parc et d'exploiter les données remontées par les équipements.
 
 ![publidata-test-technique-illustration](https://github.com/user-attachments/assets/b1a6499b-7c48-463e-8f50-757f65e74d24)

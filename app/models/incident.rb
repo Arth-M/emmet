@@ -8,7 +8,7 @@ class Incident < ApplicationRecord
 
   def resolution_delay_hours
     if resolved && resolved_at && event.occurred_at
-      ((resolved_at_time - event.occurred_at_time) / 3600).round(1)
+      ((resolved_at - event.occurred_at) / 3600).round(1)
     end
   end
 
