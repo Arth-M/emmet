@@ -45,14 +45,18 @@ class HomesController < ApplicationController
       # return an array of arrays [occurred_at, fill_percent]
       # reverse array to have early occurred_at on left and latest on right
       .reverse
-      .map { |t, v| { t: t, v: v } }
+      # create object to pass it to json response
+      .map { |occurred_at, fill_percent| { occurred_at: occurred_at, fill_percent: fill_percent } }
 
-    # Incidents de cette location
+    # From incidents
     pav_incidents = Incident
+    # join events, incident_types,
       .joins(:event, :incident_type)
       .references(:event)
+      # where location is the one clicked by user (events.location_id = location.id)
       .where(events: { location_id: location.id })
       .order("events.occurred_at DESC")
+      # the latest first, then create the object to pass it to json response
       .map do |i|
         {
           type:      i.incident_type.name,

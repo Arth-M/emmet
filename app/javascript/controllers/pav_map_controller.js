@@ -83,7 +83,7 @@ export default class extends Controller {
     fetch(`/home/pav/${id}`)
       .then(r => r.json())
       .then(({ fill_history, incidents }) => {
-      //   console.log("fill_history", fill_history)
+      // console.log("fill_history", fill_history)
       // console.log("incidents", incidents)
       // console.log("fillChartTarget", this.fillChartTarget)
       // console.log("pavIncidentsTarget", this.pavIncidentsTarget)
@@ -131,11 +131,11 @@ export default class extends Controller {
     this.chart = new Chart(ctx, {
       type: "line",
       data: {
-        labels: data.map(d => new Date(d.t).toLocaleDateString("fr-FR", {
+        labels: data.map(d => new Date(d.occurred_at).toLocaleDateString("fr-FR", {
           day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
         })),
         datasets: [{
-          data: data.map(d => d.v),
+          data: data.map(d => d.fill_percent),
           borderColor: "#38bdf8",
           backgroundColor: gradient,
           borderWidth: 2,

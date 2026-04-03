@@ -7,7 +7,7 @@ class Incident < ApplicationRecord
   validates :resolved, inclusion: { in: [true, false] }
 
   # resolution delay in hours, needs an incident and an associated event
-  # call on an incident instance
+  # to call on an incident instance
   def resolution_delay_hours
     if resolved && resolved_at && event.occurred_at
       ((resolved_at - event.occurred_at) / 3600).round(1)
