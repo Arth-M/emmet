@@ -11,9 +11,11 @@ class Event < ApplicationRecord
   validates :log_id, uniqueness:  { strict: true }
   validates :event_type, inclusion: { in: %w[sensor_reading incident badge_deposit] }
 
-  scope :sensor_events, -> { where(event_type: 'sensor') }
-  scope :badge_events,  -> { where(event_type: 'badge') }
-  scope :incident_events, -> { where(event_type: 'incident') }
+  # select * from events where event type = sensor_reading
+  scope :sensor_events, -> { where(event_type: 'sensor_reading') }
+  
+  # scope :badge_events,  -> { where(event_type: 'badge_deposit') }
+  # scope :incident_events, -> { where(event_type: 'incident') }
 
 
 end
