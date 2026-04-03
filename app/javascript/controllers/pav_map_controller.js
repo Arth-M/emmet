@@ -33,12 +33,13 @@ export default class extends Controller {
   // ── Map ────────────────────────────────────────────────────────────────────
   initMap() {
     this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
-
     L.control.zoom({ position: "bottomright" }).addTo(this.map)
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-      maxZoom: 19
+      attribution: "© OpenStreetMap", maxZoom: 19
     }).addTo(this.map)
+
+    // Stocker les markers par location id pour pouvoir les filtrer
+    this.markers = {}
 
     this.locationsValue.forEach(loc => {
       const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
@@ -47,13 +48,31 @@ export default class extends Controller {
         this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
         this.setActiveItem(loc.id)
         this.fetchPav(loc.id, loc.name)
-
       })
+      this.markers[loc.id] = { marker, waste_type: loc.waste_type }
+    })
+  }
+
+  filterByWasteType(event) {
+    const btn       = event.currentTarget
+    const wasteType = btn.dataset.wasteType
+
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
+    btn.dataset.active = "true"
+
+    // Afficher/masquer les markers
+    Object.values(this.markers).forEach(({ marker, waste_type }) => {
+      if (wasteType === "all" || waste_type === wasteType) {
+        marker.addTo(this.map)
+      } else {
+        marker.remove()
+      }
     })
   }
 
   makeIcon(loc) {
-    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 70 ? "#f59e0b" : "#10b981"
     const inner = loc.open_incident
       ? `<text x="16" y="20" text-anchor="middle" font-size="11" fill="#f59e0b">!</text>`
       : `<text x="16" y="20" text-anchor="middle" font-size="8" fill="#fff" font-family="monospace">${loc.fill_percent}</text>`
@@ -73,7 +92,9 @@ export default class extends Controller {
 
   popupHtml(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+
     return `<strong>${loc.name}</strong><br>
+           ${loc.waste_type}<br>
             Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
             ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
   }

@@ -4,15 +4,25 @@ class HomesController < ApplicationController
   def index
     # index has his view at root
 
-    # ------- For Map : all locations with last fill_percent ----------
+    # ------- For Key indicators & Map : all locations with last fill_percent ----------
     # from module location_fill
-    @locations_for_map = locations_with_last_fill
+    locations = locations_with_last_fill
+    # from model location 
+    waste_types_by_location = Location.with_waste_type_names
+    locations_with_waste = locations.map do |loc|
+      loc.as_json.merge(waste_type: waste_types_by_location[loc.id])
+    end
+    @waste_types = WasteType.pluck(:name)
+
+    @locations_for_map = locations_with_waste.to_json
+    # @locations_for_map = locations.to_json
 
     # --------- Key indicators ----------
     # PAVs to check
     # cirtical : fill > 85% / moderate_criticzal: fill > 70 %
-    @critical_pavs          = pavs_fill_above_threshold(@locations_for_map, 85)
-    @moderate_critical_pavs = pavs_fill_above_threshold(@locations_for_map, 70)
+    # pavs_fill_above in private
+    @critical_pavs          = pavs_fill_above_threshold(locations, 85)
+    @moderate_critical_pavs = pavs_fill_above_threshold(locations, 70, 85)
     @critical_pavs_count  = @critical_pavs.size
     @moderate_critical_pavs_count  = @moderate_critical_pavs.size
 
@@ -24,13 +34,15 @@ class HomesController < ApplicationController
     @resolution_rate = total_incidents.zero? ? 0 : (resolved_count.to_f / total_incidents * 100).round(1)
 
     # average fill
-    fills = @locations_for_map.map{ |location| location.fill_percent}
+    fills = locations.map{ |location| location.fill_percent}
     @avg_fill = fills.any? ? (fills.sum.to_f / fills.size).round(1) : 0
   end
 
   def pav_detail
     # pav_detail is an api : when user clicks on a pav => calls pav_detail to
     # fetch details of this pav
+
+    # find the clicked location in db
     location = Location.find(params[:id].to_i)
 
     # fill history from Join event sensor
@@ -71,10 +83,11 @@ class HomesController < ApplicationController
 
   private
 
-  def pavs_fill_above_threshold(locations, threshold)
+  # select the locations with a fill_percetn above a threshold
+  def pavs_fill_above_threshold(locations, min, max = nil)
     locations
-      .select { |location| location.fill_percent > threshold }
-      .sort_by { |location| -location.fill_percent.to_i }
+      .select { |l| l.fill_percent > min && (max.nil? || l.fill_percent <= max) }
+      .sort_by { |l| -l.fill_percent.to_i }
   end
 
 end
