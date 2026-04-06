@@ -1,4 +1,4 @@
-class HomesController < ApplicationController
+class DashboardController < ApplicationController
   # see controllers => concerns => location_fill.rb module
   include LocationFill
   def index
@@ -7,15 +7,12 @@ class HomesController < ApplicationController
     # ------- For Key indicators & Map : all locations with last fill_percent ----------
     # from module location_fill
     locations = locations_with_last_fill
-    # from model location 
-    waste_types_by_location = Location.with_waste_type_names
-    locations_with_waste = locations.map do |loc|
-      loc.as_json.merge(waste_type: waste_types_by_location[loc.id])
-    end
-    @waste_types = WasteType.pluck(:name)
+    # from service DashboardService
+    services = DashboardService.new(locations)
+    # location of pav with waste type
+    @locations_for_map = services.locations_with_waste.to_json
+    @waste_types = WasteType.array_waste_type
 
-    @locations_for_map = locations_with_waste.to_json
-    # @locations_for_map = locations.to_json
 
     # --------- Key indicators ----------
     # PAVs to check
@@ -26,16 +23,14 @@ class HomesController < ApplicationController
     @critical_pavs_count  = @critical_pavs.size
     @moderate_critical_pavs_count  = @moderate_critical_pavs.size
 
-    # incidents open, resolution rate
-    incidents_counts = Incident.group(:resolved).count
-    @open_incidents_count = incidents_counts[false] || 0
-    resolved_count   = incidents_counts[true]  || 0
-    total_incidents = @open_incidents_count + resolved_count
-    @resolution_rate = total_incidents.zero? ? 0 : (resolved_count.to_f / total_incidents * 100).round(1)
-
     # average fill
-    fills = locations.map{ |location| location.fill_percent}
-    @avg_fill = fills.any? ? (fills.sum.to_f / fills.size).round(1) : 0
+    @avg_fill = services.average_fill
+    
+   # incidents open, resolution rate
+    data_incidents = Incident.open_incident_resolution_rate
+    @open_incidents_count = data_incidents[:open_incidents_count]
+    @resolution_rate= data_incidents[:resolution_rate]
+
   end
 
   def pav_detail

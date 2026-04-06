@@ -1,4 +1,4 @@
-class IncidentsController < ApplicationController
+class IncidentController < ApplicationController
 
   def index
     # from incidents

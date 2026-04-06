@@ -15,4 +15,16 @@ class Incident < ApplicationRecord
   end
 
 
+   # incidents open, resolution rate
+   def self.open_incident_resolution_rate
+    incidents_counts = group(:resolved).count
+    open_incidents_count = incidents_counts[false] || 0
+    resolved_count   = incidents_counts[true]  || 0
+    total_incidents = open_incidents_count + resolved_count
+    resolution_rate = total_incidents.zero? ? 0 : (resolved_count.to_f / total_incidents * 100).round(1)
+    {open_incidents_count: open_incidents_count, resolution_rate: resolution_rate}
+   end
+
+
+
 end
