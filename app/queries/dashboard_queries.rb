@@ -24,15 +24,14 @@ class DashboardQueries
     # join events, incident_types,
       .joins(:event, :incident_type)
       .references(:event)
-      # where location is the one clicked by user (events.location_id = location.id)
+      # where location is the one clicked by user (events.location_id = location.id) and incidents are not resolved
       .where(events: { location_id: @location_id })
+      .where(resolved: false)
       .order("events.occurred_at DESC")
       # the latest first, then create the object to pass it to json response
       .map do |i|
         {
           type:      i.incident_type.name,
-          resolved:  i.resolved,
-          delay_h:   i.resolution_delay_hours,
           occurred:  i.event.occurred_at
         }
       end
