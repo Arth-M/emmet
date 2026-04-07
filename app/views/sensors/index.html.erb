@@ -1,38 +1,13 @@
-<section class="bg-slate-900 border border-slate-800 overflow-hidden py-4">
+
   <%= render partial: "shared/back_home"  %>
-  <div class="px-4 py-2.5 border-b border-slate-800 flex items-center gap-2">
-    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-    <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Incidents récents</h2>
-  </div>
-  <div class="overflow-x-auto">
-    <ul class="overflow-y-auto p-2 space-y-1.5">
+  <%= render partial: "shared/title_indicator_pages",
+          locals: { bg_color: "bg-sky-600", title: "Remplissage des PAV"} %>
+
+  <div class="w-full px-3">
+    <p class="text-xs"><span class="text-amber-400 text-sm ml-2 shrink-0">⚠</span> = Incident en cours</p>
+    <ul class="space-y-1.5">
       <% @locations_fill.each do |location| %>
-        <%
-          fill = location.fill_percent
-          bar_color  = fill > 85 ? "bg-rose-500"    : fill > 50 ? "bg-amber-500"    : "bg-emerald-500"
-          text_color = fill > 85 ? "text-rose-400"  : fill > 50 ? "text-amber-400"  : "text-emerald-400"
-        %>
-        <li id="pav-item-<%= location.id %>"
-            class="bg-slate-800/60 border border-slate-700/50 rounded-lg p-3 cursor-pointer
-                    transition-all duration-150 hover:border-sky-500/60 hover:bg-slate-800"
-            >
-
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-slate-200 truncate max-w-[180px]"><%= location.name %></span>
-            <% if location.open_incident %>
-              <span class="text-amber-400 text-sm animate-pulse ml-2 shrink-0">⚠</span>
-            <% end %>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <div class="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div class="h-full rounded-full <%= bar_color %>" style="width:<%= [fill, 100].min %>%"></div>
-            </div>
-            <span class="text-xs tabular-nums <%= text_color %> min-w-[34px] text-right"><%= fill %>%</span>
-          </div>
-
-        </li>
+        <%= render partial: "shared/pav_filling", locals: {pav: location} %>
       <% end %>
     </ul>
   </div>
-</section>

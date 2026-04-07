@@ -79,6 +79,7 @@ test:
 #
 production:
   <<: *default
-  database: publidata_test_production
-  username: publidata_test
-  password: <%= ENV["PUBLIDATA_TEST_DATABASE_PASSWORD"] %>
+  database: publidata_production
+  username: publidata_user
+  password: <%= Rails.application.credentials.postgre_password %>
+  host: db

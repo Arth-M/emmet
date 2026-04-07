@@ -17,61 +17,31 @@ export default class extends Controller {
     if (this.chart) this.chart.destroy()
   }
 
-  // ── Appelé par data-action="click->pav-map#selectPav" sur chaque <li> ──────
-  selectPav(event) {
-    const item = event.currentTarget
-    const id   = item.dataset.pavId
-    const lat  = parseFloat(item.dataset.pavLat)
-    const lng  = parseFloat(item.dataset.pavLng)
-    const name = item.dataset.pavName
 
-    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
-    this.setActiveItem(id)
-    this.fetchPav(id, name)
-  }
+// ── Map ────────────────────────────────────────────────────────────────────
+initMap() {
+  this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
+  L.control.zoom({ position: "bottomright" }).addTo(this.map)
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap", maxZoom: 19
+  }).addTo(this.map)
 
-  // ── Map ────────────────────────────────────────────────────────────────────
-  initMap() {
-    this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
-    L.control.zoom({ position: "bottomright" }).addTo(this.map)
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap", maxZoom: 19
-    }).addTo(this.map)
+  // Stocker les markers par location id pour pouvoir les filtrer
+  this.markers = {}
 
-    // Stocker les markers par location id pour pouvoir les filtrer
-    this.markers = {}
-
-    this.locationsValue.forEach(loc => {
-      const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
-      marker.bindPopup(this.popupHtml(loc))
-      marker.on("click", () => {
-        this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
-        this.setActiveItem(loc.id)
-        this.fetchPav(loc.id, loc.name)
-      })
-      this.markers[loc.id] = { marker, waste_type: loc.waste_type }
+  this.locationsValue.forEach(loc => {
+    const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
+    marker.bindPopup(this.popupHtml(loc))
+    marker.on("click", () => {
+      this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
+      this.setActiveItem(loc.id)
+      this.fetchPav(loc.id, loc.name)
     })
-  }
+    this.markers[loc.id] = { marker, waste_type: loc.waste_type }
+  })
+}
 
-  filterByWasteType(event) {
-    const btn       = event.currentTarget
-    const wasteType = btn.dataset.wasteType
-
-    // Mettre à jour les boutons actifs
-    document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
-    btn.dataset.active = "true"
-
-    // Afficher/masquer les markers
-    Object.values(this.markers).forEach(({ marker, waste_type }) => {
-      if (wasteType === "all" || waste_type === wasteType) {
-        marker.addTo(this.map)
-      } else {
-        marker.remove()
-      }
-    })
-  }
-
-  makeIcon(loc) {
+makeIcon(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 70 ? "#f59e0b" : "#10b981"
     const inner = loc.open_incident
       ? `<text x="16" y="20" text-anchor="middle" font-size="11" fill="#f59e0b">!</text>`
@@ -90,13 +60,35 @@ export default class extends Controller {
     })
   }
 
-  popupHtml(loc) {
-    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+filterByWasteType(event) {
+  const btn = event.currentTarget
+  const wasteType = btn.dataset.wasteType
 
-    return `<strong>${loc.name}</strong><br>
-           ${loc.waste_type}<br>
-            Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
-            ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
+    btn.dataset.active = "true"
+
+    // Afficher/masquer les markers
+    Object.values(this.markers).forEach(({ marker, waste_type }) => {
+      if (wasteType === "all" || waste_type === wasteType) {
+        marker.addTo(this.map)
+      } else {
+        marker.remove()
+      }
+    })
+  }
+
+  // ── Appelé par data-action="click->pav-map#selectPav" sur chaque <li> ──────
+  selectPav(event) {
+    const item = event.currentTarget
+    const id   = item.dataset.pavId
+    const lat  = parseFloat(item.dataset.pavLat)
+    const lng  = parseFloat(item.dataset.pavLng)
+    const name = item.dataset.pavName
+
+    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
+    this.setActiveItem(id)
+    this.fetchPav(id, name)
   }
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
@@ -112,6 +104,17 @@ export default class extends Controller {
         this.renderIncidents(incidents)
       })
   }
+
+  popupHtml(loc) {
+    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+
+    return `<strong>${loc.name}</strong><br>
+           ${loc.waste_type}<br>
+            Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
+            ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
+  }
+
+
 
 
 
@@ -190,32 +193,24 @@ export default class extends Controller {
     el.classList.remove("flex")
     console.log("Hello",incidents)
 
-    // ne fonctionne pas attention
     if (!incidents?.length) {
       el.innerHTML = `<p class="text-sm text-center py-8">Aucun incident pour ce PAV.</p>`
       return
     }
 
     el.innerHTML = incidents.map(inc => {
-  const occurredAt = new Date(inc.occurred)
-  const date = occurredAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
-  const now = new Date()
-  const delayDays = Math.floor((now - occurredAt) / 1000 / 3600 / 24)
-  const delayLabel = delayDays === 0 ? "Aujourd'hui" : `${delayDays} jours`
+      const occurredAt = new Date(inc.occurred)
+      const date = occurredAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
+      const delayLabel = inc.days_since === 0 ? "Aujourd'hui" : `${inc.days_since} jours`
 
-  return `
-    <div class="border-l-2 border-l-amber-500/50 border-b border-slate-800/60 px-4 py-3 hover:bg-slate-800/40 transition-colors">
-      <div class="flex items-center justify-between gap-2 mb-1.5">
-        <span class="bg-slate-800 border border-slate-700/80 text-slate-300 rounded px-1.5 py-0.5 text-[10px]">${inc.type}</span>
-        <span class="inline-flex items-center gap-1.5 text-xs text-amber-400">
-          <span class="w-1.5 h-1.5 rounded-full shrink-0 bg-amber-400 animate-pulse"></span>Ouvert
-        </span>
-      </div>
-      <div class="flex items-center justify-between text-[10px] text-slate-500">
-        <span>${date}</span>
-        <span>Depuis : ${delayLabel}</span>
-      </div>
-    </div>`
-}).join("")
+      return `
+        <div class="border-l-2 border-l-amber-500/50 border-b border-slate-800/60 px-4 py-3">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <p class="card px-1.5 py-0.5 text-xs">${inc.type}</p>
+            <p class="text-xs">Depuis le ${date}</p>
+            <p class="text-xs">Délai : ${delayLabel}</p>
+          </div>
+        </div>`
+    }).join("")
   }
 }

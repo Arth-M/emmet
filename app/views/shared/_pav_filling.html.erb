@@ -1,7 +1,7 @@
 <%
   fill = pav.fill_percent
-  bar_color  = fill > 85 ? "bg-red-500"    :  "bg-amber-600"
-  text_color = fill > 85 ? "text-red-400"  :  "text-amber-600"
+  bar_color  = fill > 85 ? "bg-red-500"    : fill > 70 ?  "bg-amber-500" : "bg-green-400"
+  text_color = fill > 85 ? "text-red-400"  : fill > 70 ? "text-amber-500" : "text-green-400"
 %>
 <li id="pav-item-<%= pav.id %>"
     class="card p-3 cursor-pointer

@@ -32,7 +32,8 @@ class DashboardQueries
       .map do |i|
         {
           type:      i.incident_type.name,
-          occurred:  i.event.occurred_at
+          occurred:  i.event.occurred_at,
+          days_since: i.days_since_occurred
         }
       end
   end

@@ -4,8 +4,7 @@
 %>
 
 <%# pav-map js controller %>
-<div class="min-h-screen "
-     data-controller="pav-map"
+<div class="px-4" data-controller="pav-map"
      data-pav-map-locations-value="<%= @locations_for_map %>">
 
   <%# ─── KPI BAR ─────────────────────────────────────────────────────────── %>
@@ -30,7 +29,6 @@
               ]
             }
       %>
-
     <% end %>
 
     <%= link_to sensors_index_path do %>
@@ -109,11 +107,11 @@
 
       <ul class="overflow-y-auto p-2 space-y-1">
         <% @critical_pavs.each do |pav| %>
-          <%= render partial: "shared/pav_to_check", locals: {pav: pav} %>
+          <%= render partial: "shared/pav_filling", locals: {pav: pav} %>
         <% end %>
 
         <% @moderate_critical_pavs.each do |pav| %>
-          <%= render partial: "shared/pav_to_check", locals: {pav: pav} %>
+          <%= render partial: "shared/pav_filling", locals: {pav: pav} %>
         <% end %>
 
         <% if @critical_pavs.empty? && @moderate_critical_pavs.empty? %>
@@ -124,4 +122,3 @@
 
   </div><%# /main-grid %>
 </div><%# /dashboard %>
-
