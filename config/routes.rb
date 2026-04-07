@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "dashboard#index"
   get '/home/pav/:id', to: 'dashboard#pav_detail', as: :pav_detail
-  get '/incidents', to: 'incident#index', as: :incidents_index
-  get '/fills', to: 'sensor#index', as: :fills_index
+  get '/incidents', to: 'incidents#index', as: :incidents_index
+  get '/fills', to: 'sensors#index', as: :sensors_index
 
 end

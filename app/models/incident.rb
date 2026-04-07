@@ -14,7 +14,6 @@ class Incident < ApplicationRecord
     end
   end
 
-
    # incidents open, resolution rate
    def self.open_incident_resolution_rate
     incidents_counts = group(:resolved).count

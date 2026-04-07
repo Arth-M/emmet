@@ -21,7 +21,7 @@
       </div>
     <% end %>
 
-    <%= link_to fills_index_path do %>
+    <%= link_to sensors_index_path do %>
       <div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
         <div class="absolute top-0 inset-x-0 h-0.5 bg-sky-500 rounded-t-xl"></div>
         <p class="text-2xl font-bold text-sky-400 tabular-nums"><%= @avg_fill %>%</p>
@@ -29,7 +29,7 @@
       </div>
     <% end %>
 
-    <%= link_to fills_index_path do %>
+    <%= link_to sensors_index_path do %>
       <div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
         <div class="absolute top-0 inset-x-0 h-0.5 bg-rose-500 rounded-t-xl"></div>
         <p class="text-2xl font-bold text-rose-400 tabular-nums"><%= @critical_pavs_count %></p>
@@ -193,7 +193,7 @@
           </li>
           <% end %>
 
-        <% if @critical_pavs.empty? %>
+        <% if @critical_pavs.empty? && @moderate_critical_pavs.empty? %>
           <li class="text-slate-500 text-sm text-center py-8">Aucun PAV critique.</li>
         <% end %>
       </ul>

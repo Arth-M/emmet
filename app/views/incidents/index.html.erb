@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <% @recent_incidents.each do |inc| %>
+          <% @opened_incidents.each do |inc| %>
             <% border_open = inc.resolved ? "" : "border-l-2 border-amber-500/50" %>
             <tr class="border-b border-slate-800/60 hover:bg-slate-800/40 transition-colors <%= border_open %>">
               <td class="px-4 py-2.5">
