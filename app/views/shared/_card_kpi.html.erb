@@ -1,0 +1,7 @@
+<div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
+  <div class="absolute top-0 inset-x-0 h-0.5 <%= bg_color %> rounded-t-xl"></div>
+  <% infos.each do |info| %>
+    <p class="text-2xl font-bold <%= text_color %> tabular-nums"><%= info[:value] %></p>
+    <p class="text-xs text-slate-500 uppercase tracking-widest mt-1"><%= info[:label] %></p>
+  <% end %>
+</div>

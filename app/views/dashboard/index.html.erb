@@ -12,55 +12,49 @@
   <div class="flex flex-wrap space-x-3 space-y-1 justify-between">
 
     <%= link_to incidents_index_path do %>
-      <div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
-        <div class="absolute top-0 inset-x-0 h-0.5 bg-amber-500 rounded-t-xl"></div>
-        <p class="text-2xl font-bold text-amber-400 tabular-nums"><%= @open_incidents_count %></p>
-        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Incidents ouverts</p>
-        <p class="text-2xl font-bold text-emerald-400 tabular-nums"><%= @resolution_rate %>%</p>
-        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Taux de résolution</p>
-      </div>
+      <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-amber-500", text_color: "text-amber-500",
+              infos: [
+                { value: @open_incidents_count, label: "Incidents ouverts" },
+                { value: "#{@resolution_rate}%", label: "Taux de résolution"}
+              ]
+            }
+      %>
     <% end %>
 
     <%= link_to sensors_index_path do %>
-      <div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
-        <div class="absolute top-0 inset-x-0 h-0.5 bg-sky-500 rounded-t-xl"></div>
-        <p class="text-2xl font-bold text-sky-400 tabular-nums"><%= @avg_fill %>%</p>
-        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Fill moyen</p>
-      </div>
+    <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-sky-500", text_color: "text-sky-500",
+              infos: [
+                { value: "#{@avg_fill} %", label: "Remplissage moyen" },
+              ]
+            }
+      %>
+
     <% end %>
 
     <%= link_to sensors_index_path do %>
-      <div class="relative bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-hidden">
-        <div class="absolute top-0 inset-x-0 h-0.5 bg-rose-500 rounded-t-xl"></div>
-        <p class="text-2xl font-bold text-rose-400 tabular-nums"><%= @critical_pavs_count %></p>
-        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">PAV critiques</p>
-        <p class="text-2xl font-bold text-rose-400 tabular-nums"><%= @moderate_critical_pavs_count %></p>
-        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">PAV bientôt remplis</p>
-      </div>
-
+    <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-red-400", text_color: "text-red-400",
+              infos: [
+                { value: @critical_pavs_count, label: "PAV critiques" },
+                { value: @moderate_critical_pavs_count, label: "PAV bientôt remplis"}
+              ]
+            }
+      %>
     <% end %>
-
   </div>
 
   <%# Filtre waste_type %>
 <div class="px-2 pt-2 flex flex-wrap gap-1.5">
-  <button class="text-[10px] px-2 py-1 rounded-md border border-slate-700 text-slate-400
-                 hover:border-sky-500/60 hover:text-sky-400 transition-colors
-                 data-[active=true]:border-sky-500 data-[active=true]:text-sky-400 data-[active=true]:bg-sky-500/10"
-          data-action="click->pav-map#filterByWasteType"
-          data-waste-type="all"
-          data-active="true">
-    Tous
-  </button>
-  <% @waste_types.each do |wt| %>
-    <button class="text-[10px] px-2 py-1 rounded-md border border-slate-700 text-slate-400
-                   hover:border-sky-500/60 hover:text-sky-400 transition-colors
-                   data-[active=true]:border-sky-500 data-[active=true]:text-sky-400 data-[active=true]:bg-sky-500/10"
-            data-action="click->pav-map#filterByWasteType"
-            data-waste-type="<%= wt %>"
-            data-active="false">
-      <%= wt.capitalize %>
-    </button>
+  <%= render partial: "shared/button_waste_type",
+            locals: { infos: { waste_type: "all", active: "true" } }
+  %>
+
+  <% @waste_types.each do |waste_type| %>
+    <%= render partial: "shared/button_waste_type",
+            locals: { infos: { waste_type: waste_type, active: "false" } }
+    %>
   <% end %>
 </div>
 
