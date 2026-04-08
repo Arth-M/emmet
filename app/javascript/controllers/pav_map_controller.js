@@ -18,41 +18,48 @@ export default class extends Controller {
   }
 
 
-// ── Map ────────────────────────────────────────────────────────────────────
-initMap() {
-  this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
-  L.control.zoom({ position: "bottomright" }).addTo(this.map)
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap", maxZoom: 19
-  }).addTo(this.map)
+  // ── Map ────────────────────────────────────────────────────────────────────
+  // initialise la map et les marqueurs des pavs venant de la data-value locations
+  initMap() {
+    this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
+    L.control.zoom({ position: "bottomright" }).addTo(this.map)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap", maxZoom: 19
+    }).addTo(this.map)
 
-  // Stocker les markers par location id pour pouvoir les filtrer
-  this.markers = {}
 
-  this.locationsValue.forEach(loc => {
-    const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
-    marker.bindPopup(this.popupHtml(loc))
-    marker.on("click", () => {
-      this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
-      this.setActiveItem(loc.id)
-      this.fetchPav(loc.id, loc.name)
+    this.markers = {}
+
+    // ici on crée le marqueur, y attache une pop up,
+    // définit le comportement au clic : zoom sur le marqueur cliqué
+    // on relie au pav correspondant de la sidebar 'pav à surveiller' le vas échéant (setActiveItem)
+    // on fetche les infos du pav (fill history et incidents)
+    // puis on stocke les markers par location id pour pouvoir les filtrer
+    this.locationsValue.forEach(loc => {
+      const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
+      marker.bindPopup(this.popupHtml(loc))
+      marker.on("click", () => {
+        this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
+        this.setActiveItem(loc.id)
+        this.fetchPav(loc.id, loc.name)
+      })
+      this.markers[loc.id] = { marker, waste_type: loc.waste_type }
     })
-    this.markers[loc.id] = { marker, waste_type: loc.waste_type }
-  })
-}
+  }
 
-makeIcon(loc) {
+  // création des marqueurs colorés en fonction du fill_percent et avec ! si incident en cours
+  makeIcon(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 70 ? "#f59e0b" : "#10b981"
     const inner = loc.open_incident
       ? `<text x="16" y="20" text-anchor="middle" font-size="11" fill="#f59e0b">!</text>`
-      : `<text x="16" y="20" text-anchor="middle" font-size="8" fill="#fff" font-family="monospace">${loc.fill_percent}</text>`
+      : `<text x="16" y="20" text-anchor="middle" font-size="8" fill="#fff"  font-family="monospace">${loc.fill_percent}</text>`
 
     return L.divIcon({
       html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="38" viewBox="0 0 32 38">
-               <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 22 16 22S32 26 32 16C32 7.163 24.837 0 16 0z" fill="${color}" opacity=".9"/>
-               <circle cx="16" cy="16" r="7" fill="#0f172a" opacity=".75"/>
-               ${inner}
-             </svg>`,
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 22 16 22S32 26 32 16C32 7.163 24.837 0 16 0z" fill="${color}" opacity=".9"/>
+              <circle cx="16" cy="16" r="7" fill="#0f172a" opacity=".75"/>
+              ${inner}
+            </svg>`,
       className: "",
       iconSize: [32, 38],
       iconAnchor: [16, 38],
@@ -60,9 +67,61 @@ makeIcon(loc) {
     })
   }
 
-filterByWasteType(event) {
-  const btn = event.currentTarget
-  const wasteType = btn.dataset.wasteType
+  // création des popup associées à chaque marqueur avec les infos : nom, waste_type, fill_percent, et open_incident
+  popupHtml(loc) {
+    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+
+    return `<strong>${loc.name}</strong><br>
+            ${loc.waste_type}<br>
+            Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
+            ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
+  }
+
+    // ── Sidebar active state ───────────────────────────────────────────────────
+    // permet de déterminer l'élément en surbrillance dans la sidebar en focntion du
+    // marqueur cliqué sur la carte et de scroller vers lui le cas échéant
+  setActiveItem(id) {
+    if (this.activeItem) {
+      this.activeItem.dataset.active = "false"
+    }
+    const item = document.getElementById(`pav-item-${id}`)
+    if (item) {
+      item.dataset.active = "true"
+      item.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      this.activeItem = item
+    }
+  }
+
+  // ── Appelé par data-action="click->pav-map#selectPav" sur sidebar ──────
+  // permet de déterminer et centrer sur le marqueur associé à l'élément cliqué dans la sidebar
+  // fetche les infos comme si on avait cliqué sur le marqueur de la carte
+  selectPav(event) {
+    const item = event.currentTarget
+    const id   = item.dataset.pavId
+    const lat  = parseFloat(item.dataset.pavLat)
+    const lng  = parseFloat(item.dataset.pavLng)
+    const name = item.dataset.pavName
+
+    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
+    this.setActiveItem(id)
+    this.fetchPav(id, name)
+  }
+
+  // ── Fetch ─────────────────────────────────────────────────────────────────
+  // fetche les fill_history et incident du marqueur / élément de la sidebar cliqué
+  fetchPav(id, name) {
+    fetch(`/home/pav/${id}`)
+      .then(r => r.json())
+      .then(({ fill_history, incidents }) => {
+        this.renderChart(fill_history, name)
+        this.renderIncidents(incidents)
+      })
+  }
+
+  // filtre les marqueurs par waste_type
+  filterByWasteType(event) {
+    const btn = event.currentTarget
+    const wasteType = btn.dataset.wasteType
 
     // Mettre à jour les boutons actifs
     document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
@@ -78,60 +137,8 @@ filterByWasteType(event) {
     })
   }
 
-  // ── Appelé par data-action="click->pav-map#selectPav" sur chaque <li> ──────
-  selectPav(event) {
-    const item = event.currentTarget
-    const id   = item.dataset.pavId
-    const lat  = parseFloat(item.dataset.pavLat)
-    const lng  = parseFloat(item.dataset.pavLng)
-    const name = item.dataset.pavName
-
-    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
-    this.setActiveItem(id)
-    this.fetchPav(id, name)
-  }
-
-  // ── Fetch ─────────────────────────────────────────────────────────────────
-  fetchPav(id, name) {
-    fetch(`/home/pav/${id}`)
-      .then(r => r.json())
-      .then(({ fill_history, incidents }) => {
-      // console.log("fill_history", fill_history)
-      // console.log("incidents", incidents)
-      // console.log("fillChartTarget", this.fillChartTarget)
-      // console.log("pavIncidentsTarget", this.pavIncidentsTarget)
-        this.renderChart(fill_history, name)
-        this.renderIncidents(incidents)
-      })
-  }
-
-  popupHtml(loc) {
-    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
-
-    return `<strong>${loc.name}</strong><br>
-           ${loc.waste_type}<br>
-            Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
-            ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
-  }
-
-
-
-
-
-  // ── Sidebar active state ───────────────────────────────────────────────────
-  setActiveItem(id) {
-    if (this.activeItem) {
-      this.activeItem.dataset.active = "false"
-    }
-    const item = document.getElementById(`pav-item-${id}`)
-    if (item) {
-      item.dataset.active = "true"
-      item.scrollIntoView({ behavior: "smooth", block: "nearest" })
-      this.activeItem = item
-    }
-  }
-
   // ── Chart ──────────────────────────────────────────────────────────────────
+  // graphique du fill_history
   renderChart(data, name) {
 
     if (!data?.length) {
