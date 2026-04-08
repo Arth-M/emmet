@@ -2,7 +2,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["map", "fillChart", "chartPlaceholder", "chartTitle", "pavIncidents"]
+  static targets = ["map", "fillChart", "chartPlaceholder", "pavIncidents"]
   static values  = { locations: Array }
 
   connect() {
@@ -17,29 +17,24 @@ export default class extends Controller {
     if (this.chart) this.chart.destroy()
   }
 
-  // ── Appelé par data-action="click->pav-map#selectPav" sur chaque <li> ──────
-  selectPav(event) {
-    const item = event.currentTarget
-    const id   = item.dataset.pavId
-    const lat  = parseFloat(item.dataset.pavLat)
-    const lng  = parseFloat(item.dataset.pavLng)
-    const name = item.dataset.pavName
-
-    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
-    this.setActiveItem(id)
-    this.fetchPav(id, name)
-  }
 
   // ── Map ────────────────────────────────────────────────────────────────────
+  // initialise la map et les marqueurs des pavs venant de la data-value locations
   initMap() {
     this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
-
     L.control.zoom({ position: "bottomright" }).addTo(this.map)
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-      maxZoom: 19
+      attribution: "© OpenStreetMap", maxZoom: 19
     }).addTo(this.map)
 
+
+    this.markers = {}
+
+    // ici on crée le marqueur, y attache une pop up,
+    // définit le comportement au clic : zoom sur le marqueur cliqué
+    // on relie au pav correspondant de la sidebar 'pav à surveiller' le vas échéant (setActiveItem)
+    // on fetche les infos du pav (fill history et incidents)
+    // puis on stocke les markers par location id pour pouvoir les filtrer
     this.locationsValue.forEach(loc => {
       const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
       marker.bindPopup(this.popupHtml(loc))
@@ -47,23 +42,24 @@ export default class extends Controller {
         this.map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 })
         this.setActiveItem(loc.id)
         this.fetchPav(loc.id, loc.name)
-
       })
+      this.markers[loc.id] = { marker, waste_type: loc.waste_type }
     })
   }
 
+  // création des marqueurs colorés en fonction du fill_percent et avec ! si incident en cours
   makeIcon(loc) {
-    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+    const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 70 ? "#f59e0b" : "#10b981"
     const inner = loc.open_incident
       ? `<text x="16" y="20" text-anchor="middle" font-size="11" fill="#f59e0b">!</text>`
-      : `<text x="16" y="20" text-anchor="middle" font-size="8" fill="#fff" font-family="monospace">${loc.fill_percent}</text>`
+      : `<text x="16" y="20" text-anchor="middle" font-size="8" fill="#fff"  font-family="monospace">${loc.fill_percent}</text>`
 
     return L.divIcon({
       html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="38" viewBox="0 0 32 38">
-               <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 22 16 22S32 26 32 16C32 7.163 24.837 0 16 0z" fill="${color}" opacity=".9"/>
-               <circle cx="16" cy="16" r="7" fill="#0f172a" opacity=".75"/>
-               ${inner}
-             </svg>`,
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 22 16 22S32 26 32 16C32 7.163 24.837 0 16 0z" fill="${color}" opacity=".9"/>
+              <circle cx="16" cy="16" r="7" fill="#0f172a" opacity=".75"/>
+              ${inner}
+            </svg>`,
       className: "",
       iconSize: [32, 38],
       iconAnchor: [16, 38],
@@ -71,30 +67,19 @@ export default class extends Controller {
     })
   }
 
+  // création des popup associées à chaque marqueur avec les infos : nom, waste_type, fill_percent, et open_incident
   popupHtml(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
+
     return `<strong>${loc.name}</strong><br>
+            ${loc.waste_type}<br>
             Fill : <strong style="color:${color}">${loc.fill_percent}%</strong>
             ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
   }
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
-  fetchPav(id, name) {
-    fetch(`/home/pav/${id}`)
-      .then(r => r.json())
-      .then(({ fill_history, incidents }) => {
-      // console.log("fill_history", fill_history)
-      // console.log("incidents", incidents)
-      // console.log("fillChartTarget", this.fillChartTarget)
-      // console.log("pavIncidentsTarget", this.pavIncidentsTarget)
-        this.renderChart(fill_history, name)
-        this.renderIncidents(incidents)
-      })
-  }
-
-
-
-  // ── Sidebar active state ───────────────────────────────────────────────────
+    // ── Sidebar active state ───────────────────────────────────────────────────
+    // permet de déterminer l'élément en surbrillance dans la sidebar en focntion du
+    // marqueur cliqué sur la carte et de scroller vers lui le cas échéant
   setActiveItem(id) {
     if (this.activeItem) {
       this.activeItem.dataset.active = "false"
@@ -107,9 +92,54 @@ export default class extends Controller {
     }
   }
 
+  // ── Appelé par data-action="click->pav-map#selectPav" sur sidebar ──────
+  // permet de déterminer et centrer sur le marqueur associé à l'élément cliqué dans la sidebar
+  // fetche les infos comme si on avait cliqué sur le marqueur de la carte
+  selectPav(event) {
+    const item = event.currentTarget
+    const id   = item.dataset.pavId
+    const lat  = parseFloat(item.dataset.pavLat)
+    const lng  = parseFloat(item.dataset.pavLng)
+    const name = item.dataset.pavName
+
+    this.map.flyTo([lat, lng], 15, { duration: 0.8 })
+    this.setActiveItem(id)
+    this.fetchPav(id, name)
+  }
+
+  // ── Fetch ─────────────────────────────────────────────────────────────────
+  // fetche les fill_history et incident du marqueur / élément de la sidebar cliqué
+  fetchPav(id, name) {
+    fetch(`/home/pav/${id}`)
+      .then(r => r.json())
+      .then(({ fill_history, incidents }) => {
+        this.renderChart(fill_history)
+        this.renderIncidents(incidents)
+      })
+  }
+
+  // filtre les marqueurs par waste_type
+  filterByWasteType(event) {
+    const btn = event.currentTarget
+    const wasteType = btn.dataset.wasteType
+
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
+    btn.dataset.active = "true"
+
+    // Afficher/masquer les markers
+    Object.values(this.markers).forEach(({ marker, waste_type }) => {
+      if (wasteType === "all" || waste_type === wasteType) {
+        marker.addTo(this.map)
+      } else {
+        marker.remove()
+      }
+    })
+  }
+
   // ── Chart ──────────────────────────────────────────────────────────────────
-  renderChart(data, name) {
-    this.chartTitleTarget.textContent = name || "—"
+  // graphique du fill_history
+  renderChart(data) {
 
     if (!data?.length) {
       this.fillChartTarget.classList.add("hidden")
@@ -123,7 +153,7 @@ export default class extends Controller {
 
     if (this.chart) this.chart.destroy()
 
-    const ctx      = this.fillChartTarget.getContext("2d")
+    const ctx = this.fillChartTarget.getContext("2d")
     const gradient = ctx.createLinearGradient(0, 0, 0, 180)
     gradient.addColorStop(0, "rgba(56,189,248,.3)")
     gradient.addColorStop(1, "rgba(56,189,248,.02)")
@@ -132,7 +162,7 @@ export default class extends Controller {
       type: "line",
       data: {
         labels: data.map(d => new Date(d.occurred_at).toLocaleDateString("fr-FR", {
-          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+          day: "2-digit", month: "2-digit"
         })),
         datasets: [{
           data: data.map(d => d.fill_percent),
@@ -152,48 +182,41 @@ export default class extends Controller {
           legend: { display: false },
           tooltip: {
             backgroundColor: "#1e293b", borderColor: "#334155", borderWidth: 1,
-            titleColor: "#e2e8f0", bodyColor: "#64748b",
+            bodyColor: "#64748b",
             callbacks: { label: ctx => ` ${ctx.parsed.y}%` }
           }
         },
         scales: {
           x: { ticks: { color: "#475569", font: { size: 10 }, maxTicksLimit: 7 }, grid: { color: "#1e293b" } },
-          y: { min: 0, max: 100, ticks: { color: "#475569", font: { size: 10 }, callback: v => v + "%" }, grid: { color: "#1e293b" } }
+          y: { min: 0, max: 100, ticks: { color: "#475569", font: { size: 10 }, callback: value => value + "%" }, grid: { color: "#1e293b" } }
         }
       }
     })
   }
 
   // ── PAV incidents ──────────────────────────────────────────────────────────
+  // affichage des incidents ouverts sur le pav sélectionné
   renderIncidents(incidents) {
-    const el = this.pavIncidentsTarget
+    const incidentsDisplay = this.pavIncidentsTarget
+    incidentsDisplay.classList.remove("flex")
+    console.log("Hello",incidents)
 
     if (!incidents?.length) {
-      el.innerHTML = `<p class="text-slate-600 text-sm text-center py-8">Aucun incident pour ce PAV.</p>`
+      incidentsDisplay.innerHTML = `<p class="text-sm text-center py-8">Aucun incident pour ce PAV.</p>`
       return
     }
 
-    el.innerHTML = incidents.filter(inc => !inc.resolved).map(inc => {
-      const date  = new Date(inc.occurred).toLocaleDateString("fr-FR", {
-        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
-      })
-      const delay = inc.delay_h ? `${inc.delay_h.toFixed(1)}h` : "—"
-      const statusClass = inc.resolved ? "text-emerald-400" : "text-amber-400"
-      const dotClass    = inc.resolved ? "bg-emerald-400" : "bg-amber-400 animate-pulse"
-      const label       = inc.resolved ? "Résolu" : "Ouvert"
-      const borderLeft  = inc.resolved ? "" : "border-l-2 border-l-amber-500/50"
+    incidentsDisplay.innerHTML = incidents.map(incident => {
+      const occurredAt = new Date(incident.occurred)
+      const date = occurredAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
+      const delayLabel = incident.days_since === 0 ? "Aujourd'hui" : `${incident.days_since} jours`
 
       return `
-        <div class="border-b border-slate-800/60 px-4 py-3 hover:bg-slate-800/40 transition-colors ${borderLeft}">
+        <div class="border-l-2 border-l-amber-500/50 border-b border-slate-800/60 px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1.5">
-            <span class="bg-slate-800 border border-slate-700/80 text-slate-300 rounded px-1.5 py-0.5 text-[10px]">${inc.type}</span>
-            <span class="inline-flex items-center gap-1.5 text-xs ${statusClass}">
-              <span class="w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}"></span>${label}
-            </span>
-          </div>
-          <div class="flex items-center justify-between text-[10px] text-slate-500">
-            <span>${date}</span>
-            <span>Délai : ${delay}</span>
+            <p class="card px-1.5 py-0.5 text-xs">${incident.type}</p>
+            <p class="text-xs">Depuis le ${date}</p>
+            <p class="text-xs">Délai : ${delayLabel}</p>
           </div>
         </div>`
     }).join("")

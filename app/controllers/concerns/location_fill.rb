@@ -12,13 +12,13 @@ module LocationFill
 
     # from locations
     Location
-      # join events, join_event_sensors, sensors, exclusion of location if no sensors data
+      # join events, join_event_sensors, sensors, & waste_types exclusion of location if no sensors data
       .joins(events: { join_event_sensors: :sensor })
       # join incidents if any, no exclusion if no incident
       .left_joins(:incidents)
       # only the last sensor event per location (see above)
       .where(events: { id: latest_event_ids })
-      # select location infos, sensor fill, and open_incident = true if incident.resolved = false
+      # select location infos, sensor fill, waste_type and open_incident = true if incident.resolved = false
       .select("locations.id, locations.name, locations.lat, locations.lng, sensors.fill_percent, BOOL_OR(incidents.resolved = false) AS open_incident")
       # one row per combination location.id / sensors fill : only one fill_percent per location with latest_event_ids
       .group("locations.id, sensors.fill_percent")
