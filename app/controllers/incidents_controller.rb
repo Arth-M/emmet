@@ -2,6 +2,7 @@ class IncidentsController < ApplicationController
 
   def index
     #from queries => incidents_queries.rb
+    # show resolved or unresolved incidents
     incident_queries = IncidentsQueries.new
     if params[:resolved] == "true"
       @incidents = incident_queries.resolved_incidents(150)
@@ -12,7 +13,7 @@ class IncidentsController < ApplicationController
     end
   end
 
-  # marquer un incident comme résolu ou le réouvrir
+  # update an incident to resolved or open again
   def toggle_resolved
     incident = Incident.find(params[:id].to_i)
     incident.update!(

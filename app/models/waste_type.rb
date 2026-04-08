@@ -4,6 +4,7 @@ class WasteType < ApplicationRecord
   validates :name, presence: {strict: true}
   validates :name, uniqueness: {strict: true}
 
+  # returns an array of waste_type names
   def self.array_waste_type
     pluck(:name)
   end

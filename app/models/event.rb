@@ -14,8 +14,4 @@ class Event < ApplicationRecord
   # select * from events where event type = sensor_reading
   scope :sensor_events, -> { where(event_type: 'sensor_reading') }
   
-  # scope :badge_events,  -> { where(event_type: 'badge_deposit') }
-  # scope :incident_events, -> { where(event_type: 'incident') }
-
-
 end
