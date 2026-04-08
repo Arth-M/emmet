@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.card {
+  @apply bg-mist-200 border border-mist-300 rounded-xl;
+}

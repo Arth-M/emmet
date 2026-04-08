@@ -38,3 +38,10 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+/my_secret_postgre.txt
+!/my_secret_postgre.txt
+./my_secret_postgre.txt
+!./my_secret_postgre.txt
+my_secret_postgre.txt
+my_secret_postgre.txt*

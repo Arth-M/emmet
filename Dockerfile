@@ -49,6 +49,9 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
+# Ensure the PATH includes the directory with the Rails executable
+ENV PATH="/rails/bin:${PATH}"
+
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log tmp
@@ -57,6 +60,10 @@ USER rails:rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD ["./bin/rails", "server"]
+
+# # Start the server by default, this can be overwritten at runtime
+# EXPOSE 3000
+# CMD ["./bin/rails", "server"]

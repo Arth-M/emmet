@@ -1,0 +1,13 @@
+
+  <%= render partial: "shared/back_home"  %>
+  <%= render partial: "shared/title_indicator_pages",
+          locals: { bg_color: "bg-sky-600", title: "Remplissage des PAV"} %>
+
+  <div class="w-full px-3">
+    <p class="text-xs"><span class="text-amber-400 text-sm ml-2 shrink-0">⚠</span> = Incident en cours</p>
+    <ul class="space-y-1.5">
+      <% @locations_fill.each do |location| %>
+        <%= render partial: "shared/pav_filling", locals: {pav: location} %>
+      <% end %>
+    </ul>
+  </div>

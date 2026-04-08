@@ -34,3 +34,6 @@ Les données sont intentionnellement imparfaites. La façon dont tu gères cela 
 ## 🤖 Usage de l'IA
 
 Tu es libre d'utiliser des outils d'IA pour t'aider. Par souci de transparence, merci de documenter dans le README les outils utilisés, les tâches pour lesquelles tu y as eu recours et comment tu as validé le code généré.
+
+
+

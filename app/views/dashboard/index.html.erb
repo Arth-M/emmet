@@ -1,0 +1,124 @@
+<%# app/views/homes/index.html.erb %>
+<%# CDN à ajouter dans <head> du layout :
+
+%>
+
+<%# pav-map js controller %>
+<div class="px-4" data-controller="pav-map"
+     data-pav-map-locations-value="<%= @locations_for_map %>">
+
+  <%# ─── KPI BAR ─────────────────────────────────────────────────────────── %>
+  <div class="flex flex-wrap space-x-3 space-y-1 justify-between">
+
+    <%= link_to incidents_index_path do %>
+      <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-amber-600", text_color: "text-amber-600",
+              infos: [
+                { value: @open_incidents_count, label: "Incidents ouverts" },
+                { value: "#{@resolution_rate}%", label: "Taux de résolution"}
+              ]
+            }
+      %>
+    <% end %>
+
+    <%= link_to sensors_index_path do %>
+    <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-sky-600", text_color: "text-sky-600",
+              infos: [
+                { value: "#{@avg_fill} %", label: "Remplissage moyen" },
+              ]
+            }
+      %>
+    <% end %>
+
+    <%= link_to sensors_index_path do %>
+    <%= render partial: "shared/card_kpi",
+            locals: { bg_color: "bg-red-600", text_color: "text-red-600",
+              infos: [
+                { value: @critical_pavs_count, label: "PAV critiques" },
+                { value: @moderate_critical_pavs_count, label: "PAV bientôt remplis"}
+              ]
+            }
+      %>
+    <% end %>
+  </div>
+
+
+  <%# ─── MAIN GRID ─────────────────────────────────────────────────────────── %>
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-x-3 flex-1 mt-4">
+
+    <%# ── Colonne 1  %>
+    <div class="space-y-3">
+      <%# ── Carte ───────────────────────────────────────────────────── %>
+      <section class="card overflow-hidden flex flex-col h-[420px]">
+        <%= render partial: "shared/dashboard_section_title",
+            locals: { background: "bg-sky-400", title: "Carte des PAV" } %>
+         <%# Filtre waste_type %>
+        <div class="px-2 pt-2 flex flex-wrap space-x-2 py-2">
+          <%= render partial: "shared/button_waste_type",
+                    locals: { infos: { waste_type: "all", active: "true" } }
+          %>
+
+          <% @waste_types.each do |waste_type| %>
+            <%= render partial: "shared/button_waste_type",
+                    locals: { infos: { waste_type: waste_type, active: "false" } }
+            %>
+          <% end %>
+        </div>
+        <div class="flex-1 min-h-0" data-pav-map-target="map"></div>
+      </section>
+
+      <%# Graphique + Incidents PAV %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 h-90">
+
+        <%# -- Graphique fill --------------------------------------------------- %>
+        <section class="card overflow-hidden flex flex-col min-h-[220px]">
+          <%= render partial: "shared/dashboard_section_title",
+            locals: { background: "bg-sky-600", title: "Historique de remplissage" } %>
+
+          <div class="flex-1 flex items-center justify-center p-3">
+            <p class="text-sm" data-pav-map-target="chartPlaceholder">
+              Cliquez sur un PAV pour voir l'historique
+            </p>
+            <canvas class="hidden" data-pav-map-target="fillChart"></canvas>
+          </div>
+        </section>
+
+        <%# -- Incidents du PAV sélectionné --------------------------------------%>
+        <section class="card overflow-hidden flex flex-col min-h-[220px]">
+          <%= render partial: "shared/dashboard_section_title",
+            locals: { background: "bg-amber-400", title: "Incidents PAV" } %>
+          <div class="overflow-y-auto flex-1 flex items-center justify-center" data-pav-map-target="pavIncidents">
+            <p class="text-slate-600 text-sm text-center py-8">Sélectionnez un PAV</p>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+    <%# ── Sidebar PAV critiques ────────────────────────────────────────────── %>
+    <section class="relative order-first lg:order-last card overflow-hidden flex flex-col">
+      <%= render partial: "shared/dashboard_section_title",
+            locals: { background: "bg-red-400", title: "PAV à surveiller" } %>
+        <span class="absolute top-2 right-1 bg-red-200 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full border border-rose-500/30">
+          <%= @critical_pavs_count +  @moderate_critical_pavs_count%>
+        </span>
+
+      <ul class="overflow-y-auto p-2 space-y-1">
+        <% @critical_pavs.each do |pav| %>
+          <%= render partial: "shared/pav_filling", locals: {pav: pav} %>
+        <% end %>
+
+        <% @moderate_critical_pavs.each do |pav| %>
+          <%= render partial: "shared/pav_filling", locals: {pav: pav} %>
+        <% end %>
+
+        <% if @critical_pavs.empty? && @moderate_critical_pavs.empty? %>
+          <li class="text-slate-500 text-sm text-center py-8">Aucun PAV critique.</li>
+        <% end %>
+      </ul>
+    </section>
+
+  </div><%# /main-grid %>
+</div><%# /dashboard %>
