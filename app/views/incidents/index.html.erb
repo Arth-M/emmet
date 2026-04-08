@@ -3,39 +3,69 @@
 <%= render partial: "shared/title_indicator_pages",
           locals: { bg_color: "bg-amber-600", title: "Incidents récents"} %>
 
+<div class="flex gap-2 mb-4 pl-5">
+  <%= link_to "Ouverts", incidents_index_path(resolved: false),
+      data: { turbo_frame: "incidents_table" },
+      class: "px-3 py-1.5 text-xs rounded-lg border #{@showing_resolved ? 'border-slate-700 text-slate-400' : 'border-amber-500 text-amber-400'}" %>
+
+  <%= link_to "Résolus", incidents_index_path(resolved: true),
+      data: { turbo_frame: "incidents_table" },
+      class: "px-3 py-1.5 text-xs rounded-lg border #{@showing_resolved ? 'border-emerald-500 text-emerald-400' : 'border-slate-700 text-slate-400'}" %>
+</div>
+
 <div class="overflow-x-auto">
-  <table class="w-full text-xs">
-    <thead>
-      <tr>
-        <% ["Type", "PAV", "Date", "Statut", "Délai"].each do |title| %>
-          <%= render partial: "shared/incidents_table_title", locals: { title: title } %>
-        <% end %>
-      </tr>
-    </thead>
-    <tbody>
-      <% @opened_incidents.each do |incident| %>
-        <tr class="border-b border-mist-300 hover:bg-mist-200 transition-colors">
-          <td class="px-2 py-2.5">
-            <span class="card px-2 py-1 text-xs whitespace-nowrap">
-              <%= incident.incident_type.name %>
-            </span>
-          </td>
-          <td class="px-4 py-2.5 max-w-[140px]">
-            <span><%= incident.event.location.name %></span>
-          </td>
-          <td class="px-4 py-2.5 tabular-nums whitespace-nowrap">
-            <%= incident.event.occurred_at.strftime("%d/%m/%Y") %>
-          </td>
-          <td class="px-4 py-2.5">
-              <span class="inline-flex items-center text-amber-400">
-                <span class="w-1.5 h-1.5 mr-2 rounded-full bg-amber-400"></span>Ouvert
-              </span>
-          </td>
-          <td class="px-4 py-2.5 tabular-nums text-slate-500">
-            <%= incident.days_since_occurred %> jours
-          </td>
+  <%= turbo_frame_tag "incidents_table" do %>
+    <table class="w-full text-xs">
+      <thead>
+        <tr>
+          <% ["Type", "PAV", "Date", "Statut", "Délai", "Modifier"].each do |title| %>
+            <%= render partial: "shared/incidents_table_title", locals: { title: title } %>
+          <% end %>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @incidents.each do |incident| %>
+          <tr class="border-b border-mist-300 hover:bg-mist-200 transition-colors">
+            <td class="px-2 py-2.5 w-50">
+              <span class="card px-2 py-1 text-xs whitespace-nowrap">
+                <%= incident.incident_type.name %>
+              </span>
+            </td>
+            <td class="px-4 py-2.5 w-50">
+              <span><%= incident.event.location.name %></span>
+            </td>
+            <td class="px-4 py-2.5 tabular-nums whitespace-nowrap">
+              <%= incident.event.occurred_at.strftime("%d/%m/%Y") %>
+            </td>
+            <% if incident.resolved %>
+              <td class="px-4 py-2.5 w-50">
+                <span class="inline-flex items-center text-emerald-400">
+                  <span class="w-1.5 h-1.5 mr-2 rounded-full bg-emerald-400"></span>Résolu
+                </span>
+              </td>
+              <td class="px-4 py-2.5 tabular-nums text-slate-500 w-50">
+                <%= incident.resolution_delay_days %> jours
+              </td>
+                <% else %>
+              <td class="px-4 py-2.5 w-50">
+                  <span class="inline-flex items-center text-amber-400">
+                    <span class="w-1.5 h-1.5 mr-2 rounded-full bg-amber-400 animate-pulse"></span>Ouvert
+                  </span>
+              </td>
+              <td class="px-4 py-2.5 tabular-nums text-slate-500 w-50">
+                <%= incident.days_since_occurred %> jours
+              </td>
+            <% end %>
+            <td class="px-4 py-2.5">
+              <%= button_to incident.resolved ? "Réouvrir" : "Résoudre",
+                  toggle_resolved_incident_path(incident),
+                  method: :patch,
+                  class: "text-[10px] px-2 py-1 rounded-md border transition-colors
+                          #{incident.resolved ? 'border-amber-500/50 text-amber-400 hover:bg-amber-500/10' : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'}" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <%end%>
 </div>

@@ -8,9 +8,10 @@ class Incident < ApplicationRecord
 
   # resolution delay in hours, needs an incident and an associated event
   # to call on an incident instance
-  def resolution_delay_hours
+  def resolution_delay_days
     if resolved && resolved_at && event.occurred_at
-      ((resolved_at - event.occurred_at) / 3600).round(1)
+      total_hours = ((resolved_at - event.occurred_at) / 3600).round(1)
+      days = (total_hours / 24).floor
     end
   end
 

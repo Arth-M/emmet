@@ -113,7 +113,7 @@ export default class extends Controller {
     fetch(`/home/pav/${id}`)
       .then(r => r.json())
       .then(({ fill_history, incidents }) => {
-        this.renderChart(fill_history, name)
+        this.renderChart(fill_history)
         this.renderIncidents(incidents)
       })
   }
@@ -139,7 +139,7 @@ export default class extends Controller {
 
   // ── Chart ──────────────────────────────────────────────────────────────────
   // graphique du fill_history
-  renderChart(data, name) {
+  renderChart(data) {
 
     if (!data?.length) {
       this.fillChartTarget.classList.add("hidden")
@@ -153,7 +153,7 @@ export default class extends Controller {
 
     if (this.chart) this.chart.destroy()
 
-    const ctx      = this.fillChartTarget.getContext("2d")
+    const ctx = this.fillChartTarget.getContext("2d")
     const gradient = ctx.createLinearGradient(0, 0, 0, 180)
     gradient.addColorStop(0, "rgba(56,189,248,.3)")
     gradient.addColorStop(1, "rgba(56,189,248,.02)")
@@ -162,7 +162,7 @@ export default class extends Controller {
       type: "line",
       data: {
         labels: data.map(d => new Date(d.occurred_at).toLocaleDateString("fr-FR", {
-          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+          day: "2-digit", month: "2-digit"
         })),
         datasets: [{
           data: data.map(d => d.fill_percent),
@@ -182,38 +182,39 @@ export default class extends Controller {
           legend: { display: false },
           tooltip: {
             backgroundColor: "#1e293b", borderColor: "#334155", borderWidth: 1,
-            titleColor: "#e2e8f0", bodyColor: "#64748b",
+            bodyColor: "#64748b",
             callbacks: { label: ctx => ` ${ctx.parsed.y}%` }
           }
         },
         scales: {
           x: { ticks: { color: "#475569", font: { size: 10 }, maxTicksLimit: 7 }, grid: { color: "#1e293b" } },
-          y: { min: 0, max: 100, ticks: { color: "#475569", font: { size: 10 }, callback: v => v + "%" }, grid: { color: "#1e293b" } }
+          y: { min: 0, max: 100, ticks: { color: "#475569", font: { size: 10 }, callback: value => value + "%" }, grid: { color: "#1e293b" } }
         }
       }
     })
   }
 
   // ── PAV incidents ──────────────────────────────────────────────────────────
+  // affichage des incidents ouverts sur le pav sélectionné
   renderIncidents(incidents) {
-    const el = this.pavIncidentsTarget
-    el.classList.remove("flex")
+    const incidentsDisplay = this.pavIncidentsTarget
+    incidentsDisplay.classList.remove("flex")
     console.log("Hello",incidents)
 
     if (!incidents?.length) {
-      el.innerHTML = `<p class="text-sm text-center py-8">Aucun incident pour ce PAV.</p>`
+      incidentsDisplay.innerHTML = `<p class="text-sm text-center py-8">Aucun incident pour ce PAV.</p>`
       return
     }
 
-    el.innerHTML = incidents.map(inc => {
-      const occurredAt = new Date(inc.occurred)
+    incidentsDisplay.innerHTML = incidents.map(incident => {
+      const occurredAt = new Date(incident.occurred)
       const date = occurredAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
-      const delayLabel = inc.days_since === 0 ? "Aujourd'hui" : `${inc.days_since} jours`
+      const delayLabel = incident.days_since === 0 ? "Aujourd'hui" : `${incident.days_since} jours`
 
       return `
         <div class="border-l-2 border-l-amber-500/50 border-b border-slate-800/60 px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1.5">
-            <p class="card px-1.5 py-0.5 text-xs">${inc.type}</p>
+            <p class="card px-1.5 py-0.5 text-xs">${incident.type}</p>
             <p class="text-xs">Depuis le ${date}</p>
             <p class="text-xs">Délai : ${delayLabel}</p>
           </div>

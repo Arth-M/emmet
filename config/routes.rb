@@ -10,5 +10,10 @@ Rails.application.routes.draw do
   get '/home/pav/:id', to: 'dashboard#pav_detail', as: :pav_detail
   get '/incidents', to: 'incidents#index', as: :incidents_index
   get '/fills', to: 'sensors#index', as: :sensors_index
+  resources :incidents, only: [:index] do
+    member do
+      patch :toggle_resolved
+    end
+  end
 
 end
