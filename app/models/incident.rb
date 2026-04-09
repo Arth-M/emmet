@@ -6,7 +6,7 @@ class Incident < ApplicationRecord
   validates :incident_type, presence: { strict: true }
   validates :resolved, inclusion: { in: [true, false] }
 
-  # resolution delay in hours, needs an incident and an associated event
+  # resolution delay in days, needs a resolved incident and an associated event
   # to call on an incident instance
   def resolution_delay_days
     if resolved && resolved_at && event.occurred_at
@@ -25,6 +25,7 @@ class Incident < ApplicationRecord
   {open_incidents_count: open_incidents_count, resolution_rate: resolution_rate}
   end
 
+  # time in days since unresolved incident occured
   def days_since_occurred
     if !resolved
       ((Time.current - event.occurred_at) / 1.day).floor

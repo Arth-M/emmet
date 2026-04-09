@@ -4,11 +4,13 @@ class DashboardService
     @locations = locations
   end
 
+  # compute average fill over all pavs
   def average_fill
     fills = @locations.map {|location| location.fill_percent}
     fills.any? ? (fills.sum.to_f / fills.size).round(1) : 0
   end
 
+  # returns locations + fill percent + open incident + waste type
   def locations_with_waste
     # from model location
     waste_types_by_location = Location.with_waste_type_names
