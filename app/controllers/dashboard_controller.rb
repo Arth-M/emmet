@@ -2,10 +2,10 @@ class DashboardController < ApplicationController
   # see controllers => concerns => location_fill.rb module
   include LocationFill
   def index
-    # index has his view at root
+    # home page : key indicators, interactive map
 
     # ------- For Key indicators & Map : all locations with last fill_percent ----------
-    # from module location_fill
+    # from module location_fill : find last fill_percent for all locations
     locations = locations_with_last_fill
     # from services DashboardService
     services = DashboardService.new(locations)
@@ -34,8 +34,8 @@ class DashboardController < ApplicationController
   end
 
   def pav_detail
-    # pav_detail is an api : when user clicks on a pav => calls pav_detail to
-    # fetch details of this pav
+    # pav_detail as an api : when user clicks on a pav => calls pav_detail to
+    # fetch details
 
     # collect the location id force integer
     location_id = params[:id].to_i
@@ -43,10 +43,10 @@ class DashboardController < ApplicationController
     #from queries pav_detail_queries
     pav_queries = DashboardQueries.new(location_id)
 
-    # fill history from Join event sensor
+    # fill history with last n sensor measures
     pav_fill_history = pav_queries.filling_history(30)
 
-    # From incidents
+    # retrieve open incidents
     pav_incidents = pav_queries.retrieving_incidents
 
     render json: { fill_history: pav_fill_history, incidents: pav_incidents }

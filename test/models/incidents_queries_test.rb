@@ -14,9 +14,8 @@ class IncidentsQueriesTest < ActiveSupport::TestCase
     end
   end
 
-  test "opened_incidents eager-load event, incident_type et location sans N+1" do
+  test "opened_incidents eager-load event, incident_type et location" do
     incident = @queries.opened_incidents.first
-    skip "Pas d'incident ouvert dans le seed" unless incident
     assert_not_nil incident.event
     assert_not_nil incident.incident_type
     assert_not_nil incident.event.location
@@ -36,7 +35,7 @@ class IncidentsQueriesTest < ActiveSupport::TestCase
   end
 
   test "resolved_incidents respecte la limite n" do
-    assert @queries.resolved_incidents(10).size <= 10
+    assert @queries.resolved_incidents(10).size === 10
   end
 
   test "resolved_incidents est trié par occurred_at décroissant" do

@@ -10,10 +10,10 @@ class Location < ApplicationRecord
   validates :id_pav, :name, :address, :city, :zip, :lat, :lng, presence: {strict: true}
   validates :id_pav, uniqueness: {strict: true}
 
-  # returns a hash of location records along with waste_type.name
-  scope :with_waste_type_names, -> {
+  # returns a hash of location id along with waste_type
+  def self.with_waste_type_names
     joins(join_location_capacity_waste_types: :waste_type)
     .pluck(:id, "waste_types.name")
     .to_h
-  }
+  end
 end

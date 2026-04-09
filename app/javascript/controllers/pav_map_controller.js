@@ -19,7 +19,7 @@ export default class extends Controller {
 
 
   // ── Map ────────────────────────────────────────────────────────────────────
-  // initialise la map et les marqueurs des pavs venant de la data-value locations
+  // initialize map and markers usinfg data-value locations
   initMap() {
     this.map = L.map(this.mapTarget, { zoomControl: false }).setView([48.8566, 2.3522], 12)
     L.control.zoom({ position: "bottomright" }).addTo(this.map)
@@ -30,11 +30,8 @@ export default class extends Controller {
 
     this.markers = {}
 
-    // ici on crée le marqueur, y attache une pop up,
-    // définit le comportement au clic : zoom sur le marqueur cliqué
-    // on relie au pav correspondant de la sidebar 'pav à surveiller' le vas échéant (setActiveItem)
-    // on fetche les infos du pav (fill history et incidents)
-    // puis on stocke les markers par location id pour pouvoir les filtrer
+    // create marker, add popup, click behavior => zoom, link sidebar 'pav à surveiller', fetch pav infos
+    // this.markers for filtering by waste type
     this.locationsValue.forEach(loc => {
       const marker = L.marker([loc.lat, loc.lng], { icon: this.makeIcon(loc) }).addTo(this.map)
       marker.bindPopup(this.popupHtml(loc))
@@ -47,7 +44,7 @@ export default class extends Controller {
     })
   }
 
-  // création des marqueurs colorés en fonction du fill_percent et avec ! si incident en cours
+  // markers with colors depending of fill_percent + ! if open incident
   makeIcon(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 70 ? "#f59e0b" : "#10b981"
     const inner = loc.open_incident
@@ -67,7 +64,7 @@ export default class extends Controller {
     })
   }
 
-  // création des popup associées à chaque marqueur avec les infos : nom, waste_type, fill_percent, et open_incident
+  // popuup on marker with name, waste_type, fill_percent, open_incident
   popupHtml(loc) {
     const color = loc.fill_percent > 85 ? "#f43f5e" : loc.fill_percent > 50 ? "#f59e0b" : "#10b981"
 
@@ -77,9 +74,8 @@ export default class extends Controller {
             ${loc.open_incident ? "<br>⚠ Incident ouvert" : ""}`
   }
 
-    // ── Sidebar active state ───────────────────────────────────────────────────
-    // permet de déterminer l'élément en surbrillance dans la sidebar en focntion du
-    // marqueur cliqué sur la carte et de scroller vers lui le cas échéant
+  // ── Sidebar  ───────────────────────────────────────────────────
+  // click marker map => highlight elemnt in sidebar if present
   setActiveItem(id) {
     if (this.activeItem) {
       this.activeItem.dataset.active = "false"
@@ -92,9 +88,7 @@ export default class extends Controller {
     }
   }
 
-  // ── Appelé par data-action="click->pav-map#selectPav" sur sidebar ──────
-  // permet de déterminer et centrer sur le marqueur associé à l'élément cliqué dans la sidebar
-  // fetche les infos comme si on avait cliqué sur le marqueur de la carte
+  // click sidebar element => zoom on marker + infos from pav
   selectPav(event) {
     const item = event.currentTarget
     const id   = item.dataset.pavId
@@ -108,7 +102,7 @@ export default class extends Controller {
   }
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
-  // fetche les fill_history et incident du marqueur / élément de la sidebar cliqué
+  // fetch fill history and incidents of pav
   fetchPav(id, name) {
     fetch(`/home/pav/${id}`)
       .then(r => r.json())
@@ -118,16 +112,14 @@ export default class extends Controller {
       })
   }
 
-  // filtre les marqueurs par waste_type
+  // filter markers on map by waste-type
   filterByWasteType(event) {
     const btn = event.currentTarget
     const wasteType = btn.dataset.wasteType
 
-    // Mettre à jour les boutons actifs
     document.querySelectorAll("[data-waste-type]").forEach(b => b.dataset.active = "false")
     btn.dataset.active = "true"
 
-    // Afficher/masquer les markers
     Object.values(this.markers).forEach(({ marker, waste_type }) => {
       if (wasteType === "all" || waste_type === wasteType) {
         marker.addTo(this.map)
@@ -138,7 +130,7 @@ export default class extends Controller {
   }
 
   // ── Chart ──────────────────────────────────────────────────────────────────
-  // graphique du fill_history
+  // chart for fill history
   renderChart(data) {
 
     if (!data?.length) {
@@ -195,7 +187,7 @@ export default class extends Controller {
   }
 
   // ── PAV incidents ──────────────────────────────────────────────────────────
-  // affichage des incidents ouverts sur le pav sélectionné
+  // display of open incident of the clicked pav
   renderIncidents(incidents) {
     const incidentsDisplay = this.pavIncidentsTarget
     incidentsDisplay.classList.remove("flex")

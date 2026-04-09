@@ -2,13 +2,12 @@ require "test_helper"
 
 class IncidentsToggleFlowTest < ActionDispatch::IntegrationTest
 
-  test "consultation liste ouverte puis résolution d'un incident" do
+  test "consultation liste incidents ouverts puis résolution d'un incident" do
     get incidents_index_path
     assert_response :success
     assert_equal false, assigns(:showing_resolved)
 
     incident = Incident.where(resolved: false).first
-    skip "Pas d'incident ouvert dans le seed" unless incident
 
     patch toggle_resolved_incident_path(incident)
     assert_response :redirect
@@ -27,7 +26,6 @@ class IncidentsToggleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     incident = Incident.where(resolved: true).first
-    skip "Pas d'incident résolu dans le seed" unless incident
 
     patch toggle_resolved_incident_path(incident)
     assert_response :redirect

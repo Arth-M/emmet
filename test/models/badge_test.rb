@@ -9,7 +9,6 @@ class BadgeTest < ActiveSupport::TestCase
 
   test "badge_id doit être unique" do
     existing = Badge.first
-    skip "Pas de Badge dans le seed" unless existing
 
     dup = Badge.new(
       badge_id:       existing.badge_id,
@@ -21,7 +20,6 @@ class BadgeTest < ActiveSupport::TestCase
 
   test "un badge appartient à un badge_provider" do
     badge = Badge.first
-    skip "Pas de Badge dans le seed" unless badge
     assert_not_nil badge.badge_provider
   end
 end

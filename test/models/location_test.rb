@@ -7,7 +7,6 @@ class LocationTest < ActiveSupport::TestCase
 
   test "with_waste_type_names associe des Integer à des String" do
     result = Location.with_waste_type_names
-    skip "Pas de join_location_capacity_waste_types dans le seed" if result.empty?
 
     result.each do |location_id, waste_type_name|
       assert_kind_of Integer, location_id

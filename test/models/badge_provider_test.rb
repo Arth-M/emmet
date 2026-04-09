@@ -7,7 +7,6 @@ class BadgeProviderTest < ActiveSupport::TestCase
 
   test "name doit être unique" do
     existing = BadgeProvider.first
-    skip "Pas de BadgeProvider dans le seed" unless existing
 
     dup = BadgeProvider.new(name: existing.name)
     assert_raises(ActiveModel::StrictValidationFailed) { dup.validate! }

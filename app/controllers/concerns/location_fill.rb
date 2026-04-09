@@ -8,12 +8,13 @@ module LocationFill
       .order("location_id, occurred_at DESC")
 
     # select location infos, sensor fill, waste_type and open_incident = true if incident.resolved = false
-    # one row per combination location.id / sensors fill : only one fill_percent per location with latest_event_ids
+    # retunrs one fill_percent per location with latest_event_ids
     Location
       .joins(events: { join_event_sensors: :sensor })
       .left_joins(:incidents)
       .where(events: { id: latest_event_ids })
-      .select("locations.id, locations.name, locations.lat, locations.lng, sensors.fill_percent, BOOL_OR(incidents.resolved = false) AS open_incident")
+      .select("locations.id, locations.name, locations.lat, locations.lng, sensors.fill_percent,
+      BOOL_OR(incidents.resolved = false) AS open_incident")
       .group("locations.id, sensors.fill_percent")
   end
 end

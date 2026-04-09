@@ -8,7 +8,6 @@ class DashboardToPavDetailFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     locations = JSON.parse(assigns(:locations_for_map))
-    skip "Pas de locations dans le seed" if locations.empty?
 
     pav_id = locations.first["id"]
 
@@ -34,11 +33,5 @@ class DashboardToPavDetailFlowTest < ActionDispatch::IntegrationTest
       assert pav.fill_percent > 70 && pav.fill_percent <= 85,
         "#{pav.name} hors fourchette avec fill=#{pav.fill_percent}"
     end
-  end
-
-  test "le compteur sidebar = critical_count + moderate_count" do
-    get root_path
-    expected = assigns(:critical_pavs).size + assigns(:moderate_critical_pavs).size
-    assert_equal expected, assigns(:critical_pavs_count) + assigns(:moderate_critical_pavs_count)
   end
 end

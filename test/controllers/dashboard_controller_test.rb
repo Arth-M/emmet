@@ -20,15 +20,15 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, assigns(:waste_types)
   end
 
-  test "GET / assigne @avg_fill" do
+  test "GET / assigne @avg_fill comme float" do
     get root_path
-    assert_not_nil assigns(:avg_fill)
+    assert_kind_of Float, assigns(:avg_fill)
   end
 
   test "GET / assigne @open_incidents_count et @resolution_rate" do
     get root_path
-    assert_not_nil assigns(:open_incidents_count)
-    assert_not_nil assigns(:resolution_rate)
+    assert_kind_of Integer, assigns(:open_incidents_count)
+    assert_kind_of Float, assigns(:resolution_rate)
   end
 
   test "GET / assigne @critical_pavs et @moderate_critical_pavs comme Array" do
@@ -50,7 +50,6 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
       .joins(events: :join_event_sensors)
       .where(events: { event_type: "sensor_reading" })
       .first
-    skip "Pas de location avec sensor_reading dans le seed" unless location
 
     get "/home/pav/#{location.id}"
     assert_response :success

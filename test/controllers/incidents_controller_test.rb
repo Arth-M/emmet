@@ -25,7 +25,6 @@ class IncidentsControllerTest < ActionDispatch::IntegrationTest
 
   test "toggle_resolved passe un incident ouvert à résolu" do
     incident = Incident.where(resolved: false).first
-    skip "Pas d'incident ouvert dans le seed" unless incident
 
     patch toggle_resolved_incident_path(incident)
     # use_transactional_tests = true : le changement est rollbacké après le test
@@ -35,7 +34,6 @@ class IncidentsControllerTest < ActionDispatch::IntegrationTest
 
   test "toggle_resolved passe un incident résolu à ouvert" do
     incident = Incident.where(resolved: true).first
-    skip "Pas d'incident résolu dans le seed" unless incident
 
     patch toggle_resolved_incident_path(incident)
     assert_equal false, incident.reload.resolved
@@ -44,7 +42,6 @@ class IncidentsControllerTest < ActionDispatch::IntegrationTest
 
   test "toggle_resolved redirige après la modification" do
     incident = Incident.first
-    skip "Pas d'incident dans le seed" unless incident
 
     patch toggle_resolved_incident_path(incident)
     assert_response :redirect

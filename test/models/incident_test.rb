@@ -28,28 +28,28 @@ class IncidentTest < ActiveSupport::TestCase
   # ── #resolution_delay_days ─────────────────────────────────────────────────
 
   test "resolution_delay_days retourne un Integer >= 0 pour un incident résolu" do
-    skip "Pas d'incident résolu dans le seed" unless @resolved_incident
+    # skip "Pas d'incident résolu dans le seed" unless @resolved_incident
     result = @resolved_incident.resolution_delay_days
     assert_kind_of Integer, result
     assert result >= 0
   end
 
   test "resolution_delay_days retourne nil pour un incident non résolu" do
-    skip "Pas d'incident ouvert dans le seed" unless @unresolved_incident
+    # skip "Pas d'incident ouvert dans le seed" unless @unresolved_incident
     assert_nil @unresolved_incident.resolution_delay_days
   end
 
   # ── #days_since_occurred ───────────────────────────────────────────────────
 
   test "days_since_occurred retourne un Integer >= 0 pour un incident ouvert" do
-    skip "Pas d'incident ouvert dans le seed" unless @unresolved_incident
+    # skip "Pas d'incident ouvert dans le seed" unless @unresolved_incident
     result = @unresolved_incident.days_since_occurred
     assert_kind_of Integer, result
     assert result >= 0
   end
 
   test "days_since_occurred retourne nil pour un incident résolu" do
-    skip "Pas d'incident résolu dans le seed" unless @resolved_incident
+    # skip "Pas d'incident résolu dans le seed" unless @resolved_incident
     assert_nil @resolved_incident.days_since_occurred
   end
 

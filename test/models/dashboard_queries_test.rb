@@ -7,7 +7,6 @@ class DashboardQueriesTest < ActiveSupport::TestCase
       .joins(events: :join_event_sensors)
       .where(events: { event_type: "sensor_reading" })
       .first
-    skip "Pas de location avec sensor_reading dans le seed" unless @location
     @queries = DashboardQueries.new(@location.id)
   end
 

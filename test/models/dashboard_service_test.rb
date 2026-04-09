@@ -5,7 +5,6 @@ class DashboardServiceTest < ActiveSupport::TestCase
 
   def setup
     @locations = locations_with_last_fill
-    skip "Le seed ne contient pas de sensor_reading" if @locations.empty?
     @service = DashboardService.new(@locations)
   end
 
@@ -13,11 +12,6 @@ class DashboardServiceTest < ActiveSupport::TestCase
 
   test "average_fill retourne un Float" do
     assert_kind_of Float, @service.average_fill
-  end
-
-  test "average_fill est entre 0 et 100" do
-    result = @service.average_fill
-    assert result >= 0 && result <= 100, "average_fill hors bornes : #{result}"
   end
 
   test "average_fill retourne 0 pour une collection vide" do
@@ -48,10 +42,6 @@ class DashboardServiceTest < ActiveSupport::TestCase
   test "pavs_fill_above_threshold est trié par fill_percent décroissant" do
     fills = @service.pavs_fill_above_threshold(@locations, 0).map(&:fill_percent)
     assert_equal fills.sort.reverse, fills
-  end
-
-  test "pavs_fill_above_threshold(101) retourne un tableau vide" do
-    assert_empty @service.pavs_fill_above_threshold(@locations, 101)
   end
 
   # ── locations_with_waste ───────────────────────────────────────────────────

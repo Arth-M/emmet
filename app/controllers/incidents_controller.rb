@@ -1,7 +1,7 @@
 class IncidentsController < ApplicationController
 
   def index
-    #from queries => incidents_queries.rb
+    #from queries incidents_queries.rb
     # show resolved or unresolved incidents
     incident_queries = IncidentsQueries.new
     if params[:resolved] == "true"
